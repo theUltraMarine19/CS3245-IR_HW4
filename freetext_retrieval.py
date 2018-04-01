@@ -10,9 +10,10 @@ def buildVecFromTerm(term, dict1, dict2, postings):
     """
 
 
-def buildPhrasalVec(term, dict1, dict2, postings):
+def buildPhrasalVec(phrasal_term, dict1, dict2, postings):
     """
-
+    New York university : Is this doc relevant? -> I went to York university at New York
+    Compicated maths, think about how to make it comp
     :param term:
     :param dict1:
     :param dict2:
@@ -20,14 +21,7 @@ def buildPhrasalVec(term, dict1, dict2, postings):
     :return:
     """
 
-
-def calculateRelevance(listOfTerms):
-    """
-
-    :param listOfTerms:
-    :return:
-    """
-
+# TODO: define getSynonyms as a new file or as a method
 
 
 def freetextRetrieve(query, dict1, dict2, postings):
@@ -37,5 +31,5 @@ def freetextRetrieve(query, dict1, dict2, postings):
     :param dict1:
     :param dict2:
     :param postings:
-    :return: return the result of all relevant docIDs in decreasing order of priority
+    :return: return the result of all relevant docIDs in decreasing order of priority using a heap (heapq module)
     """

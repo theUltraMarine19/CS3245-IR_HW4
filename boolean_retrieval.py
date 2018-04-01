@@ -42,6 +42,7 @@ def orderBySize(query, dict1, dict2, postings):
     :return:
     """
 
+# TODO: define getSynonyms as a new file or as a method
 
 def boolRetrieve(query, dict1, dict2, postings):
     """
