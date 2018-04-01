@@ -40,6 +40,8 @@ with others in doing the assignment and did not take notes (digital or
 printed) from the discussions.
 
 Emails: e0268461@u.nus.edu
+	e0268631@u.nus.edu
+	
 
 == References ==
 Websites as reference:
