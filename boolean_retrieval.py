@@ -32,10 +32,21 @@ def mergeLists(l1, l2):
     """
 
 
+def orderBySize(query, dict1, dict2, postings):
+    """
+
+    :param query:
+    :param dict1:
+    :param dict2:
+    :param postings:
+    :return:
+    """
+
 
 def boolRetrieve(query, dict1, dict2, postings):
     """
     The main method for the boolean retrieval.
+    The smallest sized list of postings should be merged first (orderBySize)
     :param query: a list of query terms
     :param dict1:
     :param dict2:

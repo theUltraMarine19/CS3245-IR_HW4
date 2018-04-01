@@ -58,8 +58,8 @@ def main():
         # call boolean retrieval -> e.g boolRetriev(query.split('AND'))
         br.boolRetrieve(query.split("AND"), term_dict1, term_dict2, fp_postings)
     else:
-        fr.freetextRetrieve(query.split(" "), term_dict1, term_dict2, fp_postings)
         # call freetext retrieval -> e.g freetextRetriev(query.split(' '))
+        fr.freetextRetrieve(query.split(" "), term_dict1, term_dict2, fp_postings)
 
 if __name__ == "__main__":
     main()
