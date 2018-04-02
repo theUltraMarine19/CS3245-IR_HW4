@@ -4,6 +4,7 @@ import re
 import sys
 import getopt
 import json
+import math
 import os
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.stem.porter import PorterStemmer
@@ -17,6 +18,11 @@ positional_count_dict = {}
 
 all_doc_ids = []
 ps = PorterStemmer()
+
+doc_words = dict()
+
+# the size of the training data set
+collection_size = 0
 
 
 # params:
@@ -70,6 +76,7 @@ def read_data_files_test(input_dir):
     :param input_dir: the path of the directory containing the training data set
     :return: None
     """
+    global collection_size
     with open(input_dir, 'rb') as csv_file:
         data_reader = csv.reader(csv_file, delimiter=',', )
         for index, row in enumerate(data_reader):
@@ -85,6 +92,7 @@ def read_data_files_test(input_dir):
             build_unigram_dict(doc_id, content)
             build_bigram_dict(doc_id, content)
             build_positional_index_dict(doc_id, content)
+            collection_size += 1
 
 def read_data_files(input_dir):
     """
@@ -92,6 +100,7 @@ def read_data_files(input_dir):
     :param input_dir: the path of the directory containing the training data set
     :return: None
     """
+    global collection_size
     with open(input_dir, 'rb') as csv_file:
         data_reader = csv.reader(csv_file, delimiter=',', )
         for index, row in enumerate(data_reader):
@@ -105,6 +114,7 @@ def read_data_files(input_dir):
             build_unigram_dict(doc_id, content)
             build_bigram_dict(doc_id, content)
             build_positional_index_dict(doc_id, content)
+            collection_size += 1
 
 
 def build_unigram_dict(doc_id, doc_string):
@@ -129,6 +139,14 @@ def build_unigram_dict(doc_id, doc_string):
                 else:
                     unigram_dict[term] = {}
                     unigram_dict[term][doc_id] = 1
+                # TODO: Svilen: I assume that this code will be used for the general dictionary at the end otherwise the code underneath should be changed!
+                if doc_id in doc_words:
+                    if term in doc_words[doc_id]:
+                        doc_words[doc_id][term] += 1
+                    else:
+                        doc_words[doc_id][term] = 1
+                else:
+                    doc_words[doc_id] = {term: 1}
 
 
 def build_bigram_dict(doc_id, doc_string):
@@ -212,6 +230,7 @@ def write_ngram_output(ngram_dict, ngram_count_dict, output_file_dictionary, out
     with open(output_file_postings, 'w') as out_postings:
         # term_dict has term as key, doc_id_dict as value
         # doc_id_dict has doc id as key, term frequency corresponding to the doc id as value
+        doc_norm = dict()
         for term, doc_id_dict in ngram_dict.iteritems():
 
             doc_id_list = doc_id_dict.keys()
@@ -219,6 +238,9 @@ def write_ngram_output(ngram_dict, ngram_count_dict, output_file_dictionary, out
 
             posting = []
             for doc_id in doc_id_list:
+                values = [1 + math.log(i, 10) for i in doc_words[t[0]].values()]
+                norm_val = math.sqrt(sum(i ** 2 for i in values))
+                doc_norm[t[0]] = norm_val
                 posting.append(str(doc_id) + '-' + str(doc_id_dict[doc_id]))
             # add a space at the end for distinguishing the current posting string from the next posting string
             posting_str = " ".join(str(e) for e in posting) + " "
@@ -231,6 +253,9 @@ def write_ngram_output(ngram_dict, ngram_count_dict, output_file_dictionary, out
 
     with open(output_file_dictionary, 'w') as out_dict:
         all_doc_ids.sort()
+        ngram_count_dict['N'] = collection_size
+        ngram_count_dict['DOC_NORM'] = doc_norm
+        # TODO: Svilen: I don't know if we need 'ALL'. In the doc_norm, where we will store the length of a document, we will also have all docIDs
         ngram_count_dict['ALL'] = {'f': len(all_doc_ids), 'a': all_doc_ids}
         json.dump(ngram_count_dict, out_dict)
 
