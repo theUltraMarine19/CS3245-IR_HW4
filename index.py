@@ -20,18 +20,21 @@ ps = PorterStemmer()
 
 
 # params:
-# -i dataset.csv -u unidict.txt --uni-postings unipostings.txt -b bidict.txt --bi-postings bipostings.txt
+# -i dataset.csv -u unidict.txt --uni-postings unipostings.txt -b bidict.txt --bi-postings bipostings.txt -p posdict.txt --pos-postings pospostings.txt
 # not implemented yet:
-# -p posdict.txt --pos-postings pospostings.txt- m metadict.txt
+#- m metadict.txt
 
 def usage():
     print "usage: " + sys.argv[0] + " -i dataset_file -u unigram-dictionary-file --uni-postings unigram-postings-file "\
-                                    "-b bigram-dictionary-file --bi-postings bigram-postings-file"
+                                    "-b bigram-dictionary-file --bi-postings bigram-postings-file " \
+                                    "-p postional-dictionary-file --pos-postings positional-postings-file"
 
-dataset_file = output_uni_dict = output_uni_postings = output_bi_dict = output_bi_postings = None
+
+dataset_file = output_uni_dict = output_uni_postings = output_bi_dict = output_bi_postings = \
+    output_pos_dict = output_pos_postings = None
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], 'i:u:b:', ["uni-postings=", "bi-postings="])
+    opts, args = getopt.getopt(sys.argv[1:], 'i:u:b:p:', ["uni-postings=", "bi-postings=", "pos-postings="])
 except getopt.GetoptError, err:
     usage()
     sys.exit(2)
@@ -47,11 +50,16 @@ for o, a in opts:
         output_bi_dict = a
     elif o == '--bi-postings':  # bigram postings file
         output_bi_postings = a
+    elif o == '-p':  # positional dictionary file
+        output_pos_dict = a
+    elif o == '--pos-postings':  # positional postings file
+        output_pos_postings = a
     else:
         assert False, "unhandled option"
 
 if dataset_file is None or output_uni_dict is None or output_uni_postings is None \
-        or output_bi_dict is None or output_bi_postings is None:
+        or output_bi_dict is None or output_bi_postings is None \
+        or output_pos_dict is None or output_pos_postings is None:
     usage()
     sys.exit(2)
 
@@ -165,6 +173,7 @@ def build_ngram_count_dict(ngram_count_dict, term='', head=0, tail=0, freq=0):
     :return: None
     """
     ngram_count_dict[term] = {'h': head, 't': tail, 'f': freq}
+
 
 def write_ngram_output(ngram_dict, ngram_count_dict, output_file_dictionary, output_file_postings):
     """
