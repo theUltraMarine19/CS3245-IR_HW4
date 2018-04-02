@@ -56,11 +56,11 @@ def main():
     query = ''
     if "AND" in query:
         # call boolean retrieval -> e.g boolRetriev(query.split('AND'))
-        br.boolRetrieve(query.split("AND"), term_dict1, term_dict2, fp_postings)
+        br.bool_retrieve(query.split("AND"), term_dict1, term_dict2, fp_postings)
     else:
         # call freetext retrieval -> e.g freetextRetriev(query.split(' '))
         # TODO: change with regex! -> separate by space only if no " " (phrases) in between)
-        fr.freetextRetrieve(query.split(" "), term_dict1, term_dict2, fp_postings)
+        fr.freetext_retrieve(query.split(" "), term_dict1, term_dict2, fp_postings)
 
 if __name__ == "__main__":
     main()
