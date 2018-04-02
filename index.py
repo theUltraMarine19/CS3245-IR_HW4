@@ -84,7 +84,7 @@ def read_data_files_test(input_dir):
             court = row[4]
             build_unigram_dict(doc_id, content)
             build_bigram_dict(doc_id, content)
-
+            build_positional_index_dict(doc_id, content)
 
 def read_data_files(input_dir):
     """
@@ -104,6 +104,7 @@ def read_data_files(input_dir):
             court = row[4]
             build_unigram_dict(doc_id, content)
             build_bigram_dict(doc_id, content)
+            build_positional_index_dict(doc_id, content)
 
 
 def build_unigram_dict(doc_id, doc_string):
@@ -137,7 +138,28 @@ def build_bigram_dict(doc_id, doc_string):
     :param doc_string: the text of document corresponding to the given doc_id
     :return: None
     """
+    sentences = sent_tokenize(doc_string)
+    for sent in sentences:
+        words = word_tokenize(sent)
+        for i in range(len(words) - 1):
+            word1 = words[i]
+            term1 = re.sub(r'[^a-zA-Z0-9]', '', str(word1))
+            term1 = ps.stem(term1.lower())
 
+            word2 = words[i+1]
+            term2 = re.sub(r'[^a-zA-Z0-9]', '', str(word2))
+            term2 = ps.stem(term2.lower())
+
+            if len(term1) != 0 and len(term2) != 0:
+                term = term1 + " " + term2
+                if term in bigram_dict:
+                    if doc_id in bigram_dict[term]:
+                        bigram_dict[term][doc_id] += 1
+                    else:
+                        bigram_dict[term][doc_id] = 1
+                else:
+                    bigram_dict[term] = {}
+                    bigram_dict[term][doc_id] = 1
 
 def build_positional_index_dict(doc_id, doc_string):
     """
@@ -147,7 +169,7 @@ def build_positional_index_dict(doc_id, doc_string):
     :param doc_string: the text of document corresponding to the given doc_id
     :return: None
     """
-    count = 0
+    count = 1
     sentences = sent_tokenize(doc_string)
     for sent in sentences:
         words = word_tokenize(sent)
@@ -159,12 +181,19 @@ def build_positional_index_dict(doc_id, doc_string):
                     if doc_id not in positional_dict[term]:
                         positional_dict[term][doc_id] = [count]
                     else:
-                         positional_dict[term][doc_id].append(count)
+                        positional_dict[term][doc_id].append(count)
                 else:
                     positional_dict[term] = {}
                     positional_dict[term][doc_id] = [count]
             count += 1
 
+def build_positional_index_count_dict(term='', head=0, tail=0, freq=0):
+    """
+    Generate the positional index with the frequency count of the terms in the right format for the dictionary file.
+    :type term: the term to be inserted in the dictionary
+    :return: None
+    """
+    positional_count_dict[term] = {'h': head, 't': tail, 'f': freq}
 
 def build_ngram_count_dict(ngram_count_dict, term='', head=0, tail=0, freq=0):
     """
@@ -205,7 +234,41 @@ def write_ngram_output(ngram_dict, ngram_count_dict, output_file_dictionary, out
         ngram_count_dict['ALL'] = {'f': len(all_doc_ids), 'a': all_doc_ids}
         json.dump(ngram_count_dict, out_dict)
 
+def write_positional_output(positional_dict, positional_count_dict, output_file_dictionary, output_file_postings):
+    """
+    Write the positional index to output files.
+    :return: None
+    """
+    with open(output_file_postings, 'w') as out_postings:
+        for term, doc_id_dict in positional_dict.iteritems():
+            doc_id_list = doc_id_dict.keys()
+            doc_id_list.sort()
+
+            posting = []
+            for doc_id in doc_id_list:
+                out_str = str(doc_id) + '-'
+                pos_list = doc_id_dict[doc_id]
+                tf = len(pos_list)
+                out_str += str(tf)
+                for pos_val in pos_list:
+                    out_str += '-' + str(pos_val)
+                posting.append(out_str)
+
+            posting_str = " ".join(str(e) for e in posting) + " "
+
+            head = out_postings.tell()
+            out_postings.write(posting_str)
+            freq = len(doc_id_list)
+            tail = out_postings.tell()
+
+            build_ngram_count_dict(positional_count_dict, term, head, tail, freq)
+
+    with open(output_file_dictionary, 'w') as out_dict:
+        json.dump(positional_count_dict, out_dict)
+
 
 if __name__ == "__main__":
     read_data_files_test(dataset_file)
     write_ngram_output(unigram_dict, unigram_count_dict, output_uni_dict, output_uni_postings)
+    write_ngram_output(bigram_dict, bigram_count_dict, output_bi_dict, output_bi_postings)   
+    write_positional_output(positional_dict, positional_count_dict, output)
