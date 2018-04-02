@@ -37,6 +37,7 @@ def get_postings(term, dict1, postings):
         # make use of positional indexes for fetching the postings
     else
         # throw an error
+    return []
 
     # if successfully reaches here without error, return fetched postings list
     return postings_list
@@ -115,3 +116,8 @@ def bool_retrieve(query, dictionary, postings):
     :param postings:
     :return: return the result of all relevant docIDs
     """
+    res = []
+    for term in query:
+        term_postings = get_postings(term.split(), dictionary, postings)
+        res = merge_lists(res, term_postings)
+    return res
