@@ -250,9 +250,14 @@ def write_positional_output(positional_dict, positional_count_dict, output_file_
                 pos_list = doc_id_dict[doc_id]
                 pos_list.sort()
                 tf = len(pos_list)
-                out_str += str(tf)
+                out_str += str(tf) + '-'
+                hold = 0
                 for pos_val in pos_list:
-                    out_str += '-' + str(pos_val)
+                    if hold == 0:
+                        out_str += str(pos_val)
+                        hold = 1
+                    else:
+                        out_str += ',' + str(pos_val)
                 posting.append(out_str)
 
             posting_str = " ".join(str(e) for e in posting) + " "
