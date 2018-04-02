@@ -19,34 +19,41 @@ all_doc_ids = []
 ps = PorterStemmer()
 
 
-# -i dataset.csv -u unidict.txt -b bidict.txt --uni-postings unipostings.txt --bi-postings bipostings.txt
+# -i dataset.csv -u unidict.txt --uni-postings unipostings.txt -b bidict.txt --bi-postings bipostings.txt
 def usage():
     print "usage: " + sys.argv[0] + " -i dataset_file -u unigram-dictionary-file --uni-postings unigram-postings-file "\
                                     "-b bigram-dictionary-file --bi-postings bigram-postings-file"
 
+
 dataset_file = output_uni_dict = output_uni_postings = output_bi_dict = output_bi_postings = None
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], 'i:d:p:l:')
+    opts, args = getopt.getopt(sys.argv[1:], 'i:u:b:', ["uni-postings", "bi-postings"])
 except getopt.GetoptError, err:
     usage()
     sys.exit(2)
 
 for o, a in opts:
-    if o == '-i':  # input directory
+    if o == '-i':  # dataset directory
         dataset_file = a
-    elif o == '-u':  # dictionary file
+    elif o == '-u':  # unigram dictionary file
         output_uni_dict = a
-    elif o == '--uni-postings':  # postings file
-        output_file_postings = a
-    elif o == '-b':  # document length file
-        output_file_doc_length = a
+    elif o == '--uni-postings':  # unigram postings file
+        output_uni_postings = a
+    elif o == '-b':  # bigram dictionary file
+        output_bi_dict = a
+    elif o == '--bi-postings':  # bigram postings file
+        output_bi_postings = a
     else:
         assert False, "unhandled option"
 
-if dataset_file is None or output_file_postings is None or output_uni_dict is None or output_file_doc_length is None:
-    usage()
-    sys.exit(2)
+
+print dataset_file, output_uni_dict, output_uni_postings, output_bi_dict, output_bi_postings
+
+# if dataset_file is None or output_uni_dict is None or output_uni_postings is None \
+#         or output_bi_dict is None or output_bi_postings is None:
+#     usage()
+#     sys.exit(2)
 
 
 def read_data_files_test(input_dir):
@@ -55,14 +62,14 @@ def read_data_files_test(input_dir):
     :param input_dir: the path of the directory containing the training data set
     :return: None
     """
-    i = 0
     with open('dataset.csv','rb') as csv_file:
         data_reader = csv.reader(csv_file, delimiter=',', )
-        for row in data_reader:
-            if i > 50:
+        for index, row in enumerate(data_reader):
+            if index == 1:
+                continue
+            if index >= 50:
                 break
-            print row
-            i += 1
+            print "document_id", row[0], "title", row[1], "date_posted", row[3],"court", row[4]
 
 
 def read_data_files(input_dir):
