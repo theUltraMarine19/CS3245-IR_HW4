@@ -107,6 +107,32 @@ def build_bigram_count_dict(term='', head=0, tail=0, freq=0):
     :return: None
     """
 
+def build_positional_index_dict(doc_id, doc_string):
+    """
+    Build a positional index with a single term as key and list of dictionaries with each element having doc ID as key, and the positions in the document as values
+    Positions in documents start from 1
+    :param doc_id: a document ID from the data set
+    :param doc_string: the text of document corresponding to the given doc_id
+    :return: None
+    """
+    count = 0
+    sentences = sent_tokenize(doc_string)
+    for sent in sentences:
+        words = word_tokenize(sent)
+        for word in words:
+            term = re.sub(r'[^a-zA-Z0-9]', '', str(word))
+            term = ps.stem(term.lower())
+            if len(term) != 0:
+                if term in positional_dict:
+                    if doc_id not in positional_dict[term]:
+                        positional_dict[term][doc_id] = [count]
+                    else:
+                         positional_dict[term][doc_id].append(count)
+                else:
+                    positional_dict[term] = {}
+                    positional_dict[term][doc_id] = [count]
+            count += 1
+
 def write_output():
     """
     Write the term count dictionary, doc length dictionary, and the postings file to 3 distinct txt files.
