@@ -209,22 +209,33 @@ def build_positional_index_count_dict(term='', head=0, tail=0, freq=0):
     """
     Generate the positional index with the frequency count of the terms in the right format for the dictionary file.
     :type term: the term to be inserted in the dictionary
+    :param head:
+    :param tail:
+    :param freq:
     :return: None
     """
-    positional_count_dict[term] = {'h': head, 't': tail, 'f': freq}
+    positional_count_dict[term] = {'H': head, 'T': tail, 'F': freq}
 
 def build_ngram_count_dict(ngram_count_dict, term='', head=0, tail=0, freq=0):
     """
     Build the dictionary with term as keys and the frequency count, head and tail byte location as values.
+    :param ngram_count_dict:
     :type term: the term to be added to the dictionary
+    :param head:
+    :param tail:
+    :param freq:
     :return: None
     """
-    ngram_count_dict[term] = {'h': head, 't': tail, 'f': freq}
+    ngram_count_dict[term] = {'H': head, 'T': tail, 'F': freq}
 
 
 def write_ngram_output(ngram_dict, ngram_count_dict, output_file_dictionary, output_file_postings):
     """
     Write the term count dictionary and the postings file to 2 distinct txt files.
+    :param ngram_dict:
+    :param ngram_count_dict:
+    :param output_file_dictionary:
+    :param output_file_postings:
     :return: None
     """
     with open(output_file_postings, 'w') as out_postings:
@@ -259,9 +270,14 @@ def write_ngram_output(ngram_dict, ngram_count_dict, output_file_dictionary, out
         ngram_count_dict['ALL'] = {'f': len(all_doc_ids), 'a': all_doc_ids}
         json.dump(ngram_count_dict, out_dict)
 
+
 def write_positional_output(positional_dict, positional_count_dict, output_file_dictionary, output_file_postings):
     """
     Write the positional index to output files.
+    :param positional_dict:
+    :param positional_count_dict:
+    :param output_file_dictionary:
+    :param output_file_postings:
     :return: None
     """
     with open(output_file_postings, 'w') as out_postings:
