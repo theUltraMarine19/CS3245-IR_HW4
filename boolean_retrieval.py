@@ -1,4 +1,4 @@
-def get_postings(term, dictionary, postings):
+def get_postings(term, dict1, postings):
     """
     This method returns the postings for a specific term from either dict1, dict2 or positional indexing.
     :param term: term of length 1, 2 or 3
