@@ -248,6 +248,7 @@ def write_positional_output(positional_dict, positional_count_dict, output_file_
             for doc_id in doc_id_list:
                 out_str = str(doc_id) + '-'
                 pos_list = doc_id_dict[doc_id]
+                pos_list.sort()
                 tf = len(pos_list)
                 out_str += str(tf)
                 for pos_val in pos_list:
@@ -271,4 +272,4 @@ if __name__ == "__main__":
     read_data_files_test(dataset_file)
     write_ngram_output(unigram_dict, unigram_count_dict, output_uni_dict, output_uni_postings)
     write_ngram_output(bigram_dict, bigram_count_dict, output_bi_dict, output_bi_postings)   
-    write_positional_output(positional_dict, positional_count_dict, output)
+    write_positional_output(positional_dict, positional_count_dict, output_pos_dict, output_pos_postings)
