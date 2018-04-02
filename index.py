@@ -50,6 +50,7 @@ for o, a in opts:
 
 print dataset_file, output_uni_dict, output_uni_postings, output_bi_dict, output_bi_postings
 
+# TODO Need to parse --flags properly
 # if dataset_file is None or output_uni_dict is None or output_uni_postings is None \
 #         or output_bi_dict is None or output_bi_postings is None:
 #     usage()
@@ -69,7 +70,15 @@ def read_data_files_test(input_dir):
                 continue
             if index >= 50:
                 break
-            print "document_id", row[0], "title", row[1], "date_posted", row[3],"court", row[4]
+            doc_id = row[0]
+            title = row[1]
+            content = row[2]
+            date_posted = row[3]
+            court = row[4]
+            build_unigram_dict()
+            build_bigram_dict()
+
+
 
 
 def read_data_files(input_dir):
@@ -80,8 +89,14 @@ def read_data_files(input_dir):
     """
     with open('dataset.csv','rb') as csv_file:
         data_reader = csv.reader(csv_file, delimiter=',', )
-        for row in data_reader:
-            print row
+        for index, row in enumerate(data_reader):
+            doc_id = row[0]
+            title = row[1]
+            content = row[2]
+            date_posted = row[3]
+            court = row[4]
+            build_unigram_dict()
+            build_bigram_dict()
 
 
 def build_unigram_dict(doc_id, doc_string):
