@@ -67,10 +67,9 @@ def read_data_files_test(input_dir):
         for index, row in enumerate(data_reader):
             if index == 1:
                 continue
-            if index >= 50:
+            if index >= 5:
                 break
             print "document_id", row[0], "title", row[1], "date_posted", row[3],"court", row[4]
-
 
 def read_data_files(input_dir):
     """
@@ -106,6 +105,26 @@ def build_bigram_dict(doc_id, doc_string):
     :param doc_string: the text of document corresponding to the given doc_id
     :return: None
     """
+    sentences = sent_tokenize(doc_string)
+    for sent in sentences:
+        words = word_tokenize(sent)
+        for i in range(len(words) - 1):
+            word1 = words[i]
+            term1 = re.sub(r'[^a-zA-Z0-9]', '', str(word1))
+            term1 = ps.stem(term1.lower())
+
+            word2 = words[i+1]
+            term2 = re.sub(r'[^a-zA-Z0-9]', '', str(word2))
+            term2 = ps.stem(term2.lower())
+
+            if len(term1) != 0 and len(term2) != 0:
+                term = term1 + " " + term2
+                if term in bigram_dict:
+                    if doc_id not in bigram_dict[term]:
+                        bigram_dict[term].append(doc_id)
+                else:
+                    bigram_dict[term] = [doc_id]
+
 
 def build_bigram_count_dict(term='', head=0, tail=0, freq=0):
     """
@@ -113,6 +132,7 @@ def build_bigram_count_dict(term='', head=0, tail=0, freq=0):
     :type term: the term to be added to the dictionary
     :return: None
     """
+    bigram_count_dict[term] = {'h': head, 't': tail, 'f': freq}
 
 def build_positional_index_dict(doc_id, doc_string):
     """
@@ -122,7 +142,7 @@ def build_positional_index_dict(doc_id, doc_string):
     :param doc_string: the text of document corresponding to the given doc_id
     :return: None
     """
-    count = 0
+    count = 1
     sentences = sent_tokenize(doc_string)
     for sent in sentences:
         words = word_tokenize(sent)
@@ -140,11 +160,46 @@ def build_positional_index_dict(doc_id, doc_string):
                     positional_dict[term][doc_id] = [count]
             count += 1
 
+def build_positional_index_count_dict(term='', head=0, tail=0, freq=0):
+    """
+    Generate the positional index with the frequency count of the terms in the right format for the dictionary file.
+    :type term: the term to be inserted in the dictionary
+    :return: None
+    """
+    positional_count_dict[term] = {'h': head, 't': tail, 'f': freq}
+
 def write_output():
     """
     Write the term count dictionary, doc length dictionary, and the postings file to 3 distinct txt files.
     :return: None
     """
+
+def write_positional_output(positional_dict, positional_count_dict, output_file_dictionary, output_file_postings):
+    """
+    Write the positional index to output files.
+    :return: None
+    """
+    with open(output_file_postings, 'w') as out_postings:
+        for key, val in positional_dict.iteritems():
+            head = out_postings.tell()
+            freq = len(val)
+            posting = []
+
+            for i, doc_id in enumerate(val):
+                posting.append(str(doc_id) + '-' + str(i+space))
+
+            posting_str = " ".join(str(doc_id) for doc_id in posting)
+            
+            out_postings.write(posting_str)
+            out_postings.write(" ")
+
+            tail = out_postings.tell()
+            build_term_count_dict(key, head, tail, freq)
+
+    with open(output_file_dictionary, 'w') as out_dict:
+        all_doc_ids.sort()
+        term_count_dict['ALL'] = {'f': len(all_doc_ids), 'a': all_doc_ids }
+        json.dump(term_count_dict, out_dict)
 
 
 if __name__ == "__main__":
