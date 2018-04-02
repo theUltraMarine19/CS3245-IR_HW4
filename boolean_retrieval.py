@@ -31,6 +31,24 @@ def merge_lists(l1, l2):
     :param l2: the second list that is part of the merge
     :return: the result after applying the AND merge on the two lists
     """
+    l1_len = len(l1)
+    l2_len = len(l2)
+    ans = []
+    if l1_len == 0 or l2_len == 0:
+        return ans
+    p1 = p2 = 0
+    while p1 < l1_len and p2 < l2_len:
+        l1_doc_id = l1[p1]
+        l2_doc_id = l2[p2]
+        if l1_doc_id == l2_doc_id:
+            ans.append(l1_doc_id)
+            p1 += 1
+            p2 += 1
+        elif l1_doc_id < l2_doc_id:
+            p1 += 1
+        else:
+            p2 += 1
+    return ans
 
 
 # TODO: Can we have boolean retrieval and free text in one query
