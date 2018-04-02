@@ -16,7 +16,7 @@ def get_postings(term, dictionary, fp_postings):
             # if not in dict 1, call synonyms and check for each of the top synonym if in dict 1
             # else get postings for term from dictionary 1 from postings.txt
             fp_postings.seek(dictionary[term]['H'])
-            postings_string = fp_postings.read(dictionary[term]['T'] - dictionary[term]['T'])
+            postings_string = fp_postings.read(dictionary[term]['T'] - dictionary[term]['H'])
             postings_list = postings_string.split()
 
     elif len(term) == 2:
