@@ -1,9 +1,8 @@
-def get_postings(term, dict1, dict2, postings):
+def get_postings(term, dictionary, postings):
     """
     This method returns the postings for a specific term from either dict1, dict2 or positional indexing.
     :param term: term of length 1, 2 or 3
-    :param dict1:
-    :param dict2:
+    :param dictionary:
     :param postings:
     :return: postings for the given term
     """
@@ -53,25 +52,48 @@ def merge_lists(l1, l2):
 
 # TODO: Can we have boolean retrieval and free text in one query
 
-def order_by_size(query, dict1, dict2, postings):
+def order_by_size(term, dictionary, postings):
     """
-
-    :param query:
-    :param dict1:
-    :param dict2:
+    Evaluates the size of the posting list of a given expression (if existing in the term dictionary).
+    :param term:
+    :param dictionary:
     :param postings:
-    :return:
+    :return: 0 - if not in the term dictionary
+             document frequency of the term - if the term is present in the dictionary
     """
+    res = 0
+    term = term.strip()
+    expr_words = term.split()
+    if len(expr_words) == 1:
+        if term not in dictionary:
+            # TODO: check for synonyms
+            return 0
+        res = dictionary[term]['f']
+    elif len(expr_words) == 2:
+        word1 = expr_words[0]
+        word2 = expr_words[1]
+        if word1 not in dictionary:
+            # TODO: check for synonyms
+            return 0
+        elif word2 not in dictionary[word1]:
+            # TODO: check for synonyms
+            return 0
+        res = dictionary[word1][word2]
+    elif len(expr_words) == 3:
+        # TODO: use positional indexing
+        res = 0
+    else:
+        print "Incorrect input"
+    return res
 
 # TODO: define get_synonyms as a new file or as a method
 
-def bool_retrieve(query, dict1, dict2, postings):
+def bool_retrieve(query, dictionary, postings):
     """
     The main method for the boolean retrieval.
     The smallest sized list of postings should be merged first (orderBySize)
     :param query: a list of query terms
-    :param dict1:
-    :param dict2:
+    :param dictionary:
     :param postings:
     :return: return the result of all relevant docIDs
     """
