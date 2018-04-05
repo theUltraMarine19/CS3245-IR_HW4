@@ -380,7 +380,7 @@ def write_meta_output(meta_dict, meta_count_dict, output_file_dictionary, output
 
 
 if __name__ == "__main__":
-    read_data_files_test(dataset_file)
+    read_data_files(dataset_file)
     # write_ngram_output(unigram_dict, unigram_count_dict, output_uni_dict, output_uni_postings)
     # write_ngram_output(bigram_dict, bigram_count_dict, output_bi_dict, output_bi_postings)
     write_positional_output(positional_dict, positional_count_dict, output_pos_dict, output_pos_postings)
