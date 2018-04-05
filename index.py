@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+
 import csv
 import re
 import sys
@@ -18,6 +18,8 @@ unigram_dict = {}
 unigram_count_dict = {}
 bigram_dict = {}
 bigram_count_dict = {}
+trigram_dict = {}
+trigram_count_dict = {}
 positional_dict = {}
 positional_count_dict = {}
 meta_dict = {"title":{}, "date_posted":{}, "court":{}}
@@ -33,22 +35,23 @@ collection_size = 0
 
 
 # params:
-# -i dataset.csv -u unidict.txt --uni-postings unipostings.txt -b bidict.txt --bi-postings bipostings.txt -p posdict.txt --pos-postings pospostings.txt
-# not implemented yet:
-#- m metadict.txt
+# -i dataset.csv -u unidict.txt --up unipostings.txt -b bidict.txt --bp bipostings.txt -t tridict.txt --tp tripostings.txt
+# -p posdict.txt --pp pospostings.txt -m metadict.txt --meta-postings metapostings.txt
 
 def usage():
-    print "usage: " + sys.argv[0] + " -i dataset_file -u unigram-dictionary-file --uni-postings unigram-postings-file "\
-                                    "-b bigram-dictionary-file --bi-postings bigram-postings-file " \
-                                    "-p postional-dictionary-file --pos-postings positional-postings-file" \
-                                    "-m metadata-dictionary-file --meta-postings metadata-postings-file"
+    print "usage: " + sys.argv[0] + " -i dataset_file -u unigram-dictionary-file --up unigram-postings-file "\
+                                    "-b bigram-dictionary-file --bp bigram-postings-file " \
+                                    "-t trigram-dictionray-file --tp trigram-postings-file" \
+                                    "-p postional-dictionary-file --pp positional-postings-file" \
+                                    "-m metadata-dictionary-file --mp metadata-postings-file"
 
 
 dataset_file = output_uni_dict = output_uni_postings = output_bi_dict = output_bi_postings = \
-    output_pos_dict = output_pos_postings = output_meta_dict = output_meta_postings = None
+    output_pos_dict = output_pos_postings = output_meta_dict = output_meta_postings = \
+    output_tri_dict = output_tri_postings = None
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], 'i:u:b:p:m:', ["uni-postings=", "bi-postings=", "pos-postings=", "meta-postings="])
+    opts, args = getopt.getopt(sys.argv[1:], 'i:u:b:t:p:m:', ["up=", "bp=", "tp=", "pp=", "mp="])
 except getopt.GetoptError, err:
     usage()
     sys.exit(2)
@@ -58,19 +61,23 @@ for o, a in opts:
         dataset_file = a
     elif o == '-u':  # unigram dictionary file
         output_uni_dict = a
-    elif o == '--uni-postings':  # unigram postings file
+    elif o == '--up':  # unigram postings file
         output_uni_postings = a
     elif o == '-b':  # bigram dictionary file
         output_bi_dict = a
-    elif o == '--bi-postings':  # bigram postings file
+    elif o == '--bp':  # bigram postings file
         output_bi_postings = a
+    elif o == '-t':  # trigram dictionary file
+        output_tri_dict = a
+    elif o == '--tp':  # trigram postings file
+        output_tri_postings = a
     elif o == '-p':  # positional dictionary file
         output_pos_dict = a
-    elif o == '--pos-postings':  # positional postings file
+    elif o == '--pp':  # positional postings file
         output_pos_postings = a
     elif o == '-m':  # metadata dictionary file
         output_meta_dict = a
-    elif o == '--meta-postings':  # metadata postings file
+    elif o == '--mp':  # metadata postings file
         output_meta_postings = a
     else:
         assert False, "unhandled option"
@@ -95,7 +102,7 @@ def read_data_files_test(input_dir):
         for index, row in enumerate(data_reader):
             if index == 0:
                 continue
-            if index >= 50:
+            if index >= 10:
                 break
             doc_id = row[0]
             title = row[1]
@@ -104,9 +111,11 @@ def read_data_files_test(input_dir):
             court = row[4]
             build_unigram_dict(doc_id, content)
             build_bigram_dict(doc_id, content)
+            build_trigram_dict(doc_id, content)
             build_positional_index_dict(doc_id, content)
             build_meta_dict(doc_id, title, content, date_posted, court)
             collection_size += 1
+
 
 def read_data_files(input_dir):
     """
@@ -125,8 +134,13 @@ def read_data_files(input_dir):
             content = row[2]
             date_posted = row[3]
             court = row[4]
+            # content = unicode(content, errors='ignore')
+            # content = content.decode(encoding='ascii', errors='ignore')
+            # content.decode
+            # unicode(content, errors='ignore')
             build_unigram_dict(doc_id, content)
             build_bigram_dict(doc_id, content)
+            build_trigram_dict(doc_id, content)
             build_positional_index_dict(doc_id, content)
             build_meta_dict(doc_id, title, content, date_posted, court)
             collection_size += 1
@@ -193,6 +207,41 @@ def build_bigram_dict(doc_id, doc_string):
                 else:
                     bigram_dict[term] = {}
                     bigram_dict[term][doc_id] = 1
+
+
+def build_trigram_dict(doc_id, doc_string):
+    """
+    Build a trigram dictionary with a pair of terms as keys and list of distinct doc IDs as values.
+    :param doc_id: a document ID from the data set
+    :param doc_string: the text of document corresponding to the given doc_id
+    :return: None
+    """
+    sentences = sent_tokenize(doc_string)
+    for sent in sentences:
+        words = word_tokenize(sent)
+        for i in range(len(words) - 2):
+            word1 = words[i]
+            term1 = re.sub(r'[^a-zA-Z0-9]', '', str(word1))
+            term1 = ps.stem(term1.lower())
+
+            word2 = words[i + 1]
+            term2 = re.sub(r'[^a-zA-Z0-9]', '', str(word2))
+            term2 = ps.stem(term2.lower())
+
+            word3 = words[i + 2]
+            term3 = re.sub(r'[^a-zA-Z0-9]', '', str(word3))
+            term3 = ps.stem(term3.lower())
+
+            if len(term1) != 0 and len(term2) != 0 and len(term3) != 0:
+                term = term1 + " " + term2 + " " + term3
+                if term in trigram_dict:
+                    if doc_id in trigram_dict[term]:
+                        trigram_dict[term][doc_id] += 1
+                    else:
+                        trigram_dict[term][doc_id] = 1
+                else:
+                    trigram_dict[term] = {}
+                    trigram_dict[term][doc_id] = 1
 
 # def build_dict(doc_id, doc_string):
 
@@ -362,7 +411,6 @@ def write_positional_output(positional_dict, positional_count_dict, output_file_
 def write_meta_output(meta_dict, meta_count_dict, output_file_dictionary, output_file_postings):
     with open(output_file_postings, 'w') as out_postings:
         for category, term_dict in meta_dict.iteritems():
-            print term_dict
             for term, posting in term_dict.iteritems():
                 posting.sort()
                 posting_str = " ".join(str(e) for e in posting) + " "
@@ -379,7 +427,8 @@ def write_meta_output(meta_dict, meta_count_dict, output_file_dictionary, output
 
 if __name__ == "__main__":
     read_data_files_test(dataset_file)
-    # write_ngram_output(unigram_dict, unigram_count_dict, output_uni_dict, output_uni_postings)
-    # write_ngram_output(bigram_dict, bigram_count_dict, output_bi_dict, output_bi_postings)
+    write_ngram_output(unigram_dict, unigram_count_dict, output_uni_dict, output_uni_postings)
+    write_ngram_output(bigram_dict, bigram_count_dict, output_bi_dict, output_bi_postings)
+    write_ngram_output(trigram_dict, trigram_count_dict, output_tri_dict, output_tri_postings)
     write_positional_output(positional_dict, positional_count_dict, output_pos_dict, output_pos_postings)
     write_meta_output(meta_dict, meta_count_dict, output_meta_dict, output_meta_postings)
