@@ -17,6 +17,7 @@ sys.setdefaultencoding('ISO-8859-1')
 # TODO think about the benefits of stemming
 # TODO check if all the memory is able to store all dictionaries before we write them out
 
+dictionary = {}
 unigram_dict = {}
 unigram_count_dict = {}
 bigram_dict = {}
@@ -34,11 +35,9 @@ doc_words = dict()
 # the size of the training data set
 collection_size = 0
 
-
 # params:
 # -i dataset.csv -u unidict.txt --uni-postings unipostings.txt -b bidict.txt --bi-postings bipostings.txt -p posdict.txt --pos-postings pospostings.txt
-# not implemented yet:
-#- m metadict.txt
+#- m metadict.txt --meta-postings metapostings.txt
 
 def usage():
     print "usage: " + sys.argv[0] + " -i dataset_file -u unigram-dictionary-file --uni-postings unigram-postings-file "\
@@ -197,7 +196,62 @@ def build_bigram_dict(doc_id, doc_string):
                     bigram_dict[term] = {}
                     bigram_dict[term][doc_id] = 1
 
-# def build_dict(doc_id, doc_string):
+
+def build_dict(doc_id, doc_string):
+    """
+    Build a mixed dictionary with a pair of terms as keys and list of distinct doc IDs as values.
+    :param doc_id: a document ID from the data set
+    :param doc_string: the text of document corresponding to the given doc_id
+    :return: None
+    """
+    sentences = sent_tokenize(doc_string)
+    for sent in sentences:
+        words = word_tokenize(sent)
+        for i in range(len(words) - 2):
+            word1 = words[i]
+            term1 = re.sub(r'[^a-zA-Z0-9]', '', str(word1))
+            term1 = ps.stem(term1.lower())
+
+            word2 = words[i+1]
+            term2 = re.sub(r'[^a-zA-Z0-9]', '', str(word2))
+            term2 = ps.stem(term2.lower())
+
+            word3 = words[i+2]
+            term3 = re.sub(r'[^a-zA-Z0-9]', '', str(word3))
+            term3 = ps.stem(term3.lower())
+
+            if len(term1) != 0 and len(term2) != 0 and len(term3):
+                if term1 in dictionary:
+                    if doc_id in dictionary[term1]:
+                        dictionary[term1][doc_id] += 1
+                    else:
+                        dictionary[term1][doc_id] = 1
+                    if term2 in dictionary[term1]:
+                        if doc_id in dictionary[term1][term2]:
+                            dictionary[term1][term2][doc_id] += 1
+                        else:
+                            dictionary[term1][term2][doc_id] = 1
+                        if term3 in dictionary[term1][term2]:
+                            if doc_id in dictionary[term1][term2][term3]:
+                                dictionary[term1][term2][term3][doc_id] += 1
+                            else:
+                                dictionary[term1][term2][term3][doc_id] = 1
+                        else:
+                            dictionary[term1][term2][term3] = {}
+                            dictionary[term1][term2][term3][doc_id] = 1
+                    else:
+                        dictionary[term1][term2] = {}
+                        dictionary[term1][term2][doc_id] = 1
+                        dictionary[term1][term2][term3] = {}
+                        dictionary[term1][term2][term3][doc_id] = 1
+                else:
+                    dictionary[term1] = {}
+                    dictionary[term1][doc_id] = 1
+                    dictionary[term1][term2] = {}
+                    dictionary[term1][term2][doc_id] = 1
+                    dictionary[term1][term2][term3] = {}
+                    dictionary[term1][term2][term3][doc_id] = 1
+
 
 def build_positional_index_dict(doc_id, doc_string):
     """
@@ -364,7 +418,7 @@ def write_positional_output(positional_dict, positional_count_dict, output_file_
 def write_meta_output(meta_dict, meta_count_dict, output_file_dictionary, output_file_postings):
     with open(output_file_postings, 'w') as out_postings:
         for category, term_dict in meta_dict.iteritems():
-            print term_dict
+            # print term_dict
             for term, posting in term_dict.iteritems():
                 posting.sort()
                 posting_str = " ".join(str(e) for e in posting) + " "
