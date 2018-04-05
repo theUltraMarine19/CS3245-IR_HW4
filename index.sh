@@ -1,0 +1,1 @@
+python index.py -i dataset.csv -u unidict.txt --uni-postings unipostings.txt -b bidict.txt --bi-postings bipostings.txt -p posdict.txt --pos-postings pospostings.txt -m metadict.txt --meta-postings metapostings.txt

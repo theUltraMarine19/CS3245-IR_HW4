@@ -8,6 +8,9 @@ import math
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.stem.porter import PorterStemmer
 
+reload(sys)
+sys.setdefaultencoding('ISO-8859-1')
+
 # TODO ask if we're only allowed to submit one dictionary file => merging bigram and unigram dict together
 # TODO metadata dictionary
 # TODO faster computation for log frequency from Svilen
@@ -139,7 +142,7 @@ def build_unigram_dict(doc_id, doc_string):
     :param doc_string: the text of document corresponding to the given doc_id
     :return: None
     """
-    sentences = sent_tokenize(doc_string)
+    sentences = sent_tokenize(doc_string.decode('ISO-8859-1'))
     for sent in sentences:
         words = word_tokenize(sent)
         for word in words:
