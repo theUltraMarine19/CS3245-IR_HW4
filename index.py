@@ -20,6 +20,8 @@ bigram_dict = {}
 bigram_count_dict = {}
 positional_dict = {}
 positional_count_dict = {}
+meta_dict = {"title":{}, "date_posted":{}, "court":{}}
+meta_count_dict = {"title":{}, "date_posted":{}, "court":{}}
 
 all_doc_ids = []
 ps = PorterStemmer()
@@ -38,14 +40,15 @@ collection_size = 0
 def usage():
     print "usage: " + sys.argv[0] + " -i dataset_file -u unigram-dictionary-file --uni-postings unigram-postings-file "\
                                     "-b bigram-dictionary-file --bi-postings bigram-postings-file " \
-                                    "-p postional-dictionary-file --pos-postings positional-postings-file"
+                                    "-p postional-dictionary-file --pos-postings positional-postings-file" \
+                                    "-m metadata-dictionary-file --meta-postings metadata-postings-file"
 
 
 dataset_file = output_uni_dict = output_uni_postings = output_bi_dict = output_bi_postings = \
-    output_pos_dict = output_pos_postings = None
+    output_pos_dict = output_pos_postings = output_meta_dict = output_meta_postings = None
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], 'i:u:b:p:', ["uni-postings=", "bi-postings=", "pos-postings="])
+    opts, args = getopt.getopt(sys.argv[1:], 'i:u:b:p:m:', ["uni-postings=", "bi-postings=", "pos-postings=", "meta-postings="])
 except getopt.GetoptError, err:
     usage()
     sys.exit(2)
@@ -65,12 +68,17 @@ for o, a in opts:
         output_pos_dict = a
     elif o == '--pos-postings':  # positional postings file
         output_pos_postings = a
+    elif o == '-m':  # metadata dictionary file
+        output_meta_dict = a
+    elif o == '--meta-postings':  # metadata postings file
+        output_meta_postings = a
     else:
         assert False, "unhandled option"
 
 if dataset_file is None or output_uni_dict is None or output_uni_postings is None \
         or output_bi_dict is None or output_bi_postings is None \
-        or output_pos_dict is None or output_pos_postings is None:
+        or output_pos_dict is None or output_pos_postings is None \
+        or output_meta_dict is None or output_meta_postings is None:
     usage()
     sys.exit(2)
 
@@ -87,7 +95,7 @@ def read_data_files_test(input_dir):
         for index, row in enumerate(data_reader):
             if index == 0:
                 continue
-            if index >= 5:
+            if index >= 50:
                 break
             doc_id = row[0]
             title = row[1]
@@ -97,6 +105,7 @@ def read_data_files_test(input_dir):
             build_unigram_dict(doc_id, content)
             build_bigram_dict(doc_id, content)
             build_positional_index_dict(doc_id, content)
+            build_meta_dict(doc_id, title, content, date_posted, court)
             collection_size += 1
 
 def read_data_files(input_dir):
@@ -119,6 +128,7 @@ def read_data_files(input_dir):
             build_unigram_dict(doc_id, content)
             build_bigram_dict(doc_id, content)
             build_positional_index_dict(doc_id, content)
+            build_meta_dict(doc_id, title, content, date_posted, court)
             collection_size += 1
 
 
@@ -184,6 +194,9 @@ def build_bigram_dict(doc_id, doc_string):
                     bigram_dict[term] = {}
                     bigram_dict[term][doc_id] = 1
 
+# def build_dict(doc_id, doc_string):
+
+
 def build_positional_index_dict(doc_id, doc_string):
     """
     Build a positional index with a single term as key and list of dictionaries with each element having doc ID as key, and the positions in the document as values
@@ -210,6 +223,19 @@ def build_positional_index_dict(doc_id, doc_string):
                     positional_dict[term][doc_id] = [count]
             count += 1
 
+
+def build_meta_dict(doc_id, title, content, date_posted, court):
+    if title not in meta_dict['title']:
+        meta_dict['title'][title] = []
+    meta_dict['title'][title].append(doc_id)
+    if date_posted not in meta_dict['date_posted']:
+        meta_dict['date_posted'][date_posted] = []
+    meta_dict['date_posted'][date_posted].append(doc_id)
+    if court not in meta_dict['court']:
+        meta_dict['court'][court] = []
+    meta_dict['court'][court].append(doc_id)
+
+
 def build_positional_index_count_dict(term='', head=0, tail=0, freq=0):
     """
     Generate the positional index with the frequency count of the terms in the right format for the dictionary file.
@@ -220,6 +246,7 @@ def build_positional_index_count_dict(term='', head=0, tail=0, freq=0):
     :return: None
     """
     positional_count_dict[term] = {'H': head, 'T': tail, 'F': freq}
+
 
 def build_ngram_count_dict(ngram_count_dict, term='', head=0, tail=0, freq=0):
     """
@@ -232,6 +259,19 @@ def build_ngram_count_dict(ngram_count_dict, term='', head=0, tail=0, freq=0):
     :return: None
     """
     ngram_count_dict[term] = {'H': head, 'T': tail, 'F': freq}
+
+
+def build_meta_count_dict(category='', term='', head=0, tail=0, freq=0):
+    """
+    Build the dictionary with term as keys and the frequency count, head and tail byte location as values.
+    :param category: one of the catergories of metadata
+    :param term: the term to be added to the dictionary
+    :param head:
+    :param tail:
+    :param freq:
+    :return: None
+    """
+    meta_count_dict[category][term] = {'H': head, 'T': tail, 'F': freq}
 
 
 def write_ngram_output(ngram_dict, ngram_count_dict, output_file_dictionary, output_file_postings):
@@ -319,8 +359,27 @@ def write_positional_output(positional_dict, positional_count_dict, output_file_
         json.dump(positional_count_dict, out_dict)
 
 
+def write_meta_output(meta_dict, meta_count_dict, output_file_dictionary, output_file_postings):
+    with open(output_file_postings, 'w') as out_postings:
+        for category, term_dict in meta_dict.iteritems():
+            print term_dict
+            for term, posting in term_dict.iteritems():
+                posting.sort()
+                posting_str = " ".join(str(e) for e in posting) + " "
+                head = out_postings.tell()
+                out_postings.write(posting_str)
+                freq = len(posting)
+                tail = out_postings.tell()
+
+                build_meta_count_dict(category, term, head, tail, freq)
+
+    with open(output_file_dictionary, 'w') as out_dict:
+        json.dump(meta_count_dict, out_dict)
+
+
 if __name__ == "__main__":
     read_data_files_test(dataset_file)
-    write_ngram_output(unigram_dict, unigram_count_dict, output_uni_dict, output_uni_postings)
-    write_ngram_output(bigram_dict, bigram_count_dict, output_bi_dict, output_bi_postings)   
+    # write_ngram_output(unigram_dict, unigram_count_dict, output_uni_dict, output_uni_postings)
+    # write_ngram_output(bigram_dict, bigram_count_dict, output_bi_dict, output_bi_postings)
     write_positional_output(positional_dict, positional_count_dict, output_pos_dict, output_pos_postings)
+    write_meta_output(meta_dict, meta_count_dict, output_meta_dict, output_meta_postings)
