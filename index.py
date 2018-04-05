@@ -5,9 +5,14 @@ import sys
 import getopt
 import json
 import math
-import os
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.stem.porter import PorterStemmer
+
+# TODO ask if we're only allowed to submit one dictionary file => merging bigram and unigram dict together
+# TODO metadata dictionary
+# TODO faster computation for log frequency from Svilen
+# TODO think about the benefits of stemming
+# TODO check if all the memory is able to store all dictionaries before we write them out
 
 unigram_dict = {}
 unigram_count_dict = {}
