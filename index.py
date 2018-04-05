@@ -8,6 +8,9 @@ import math
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.stem.porter import PorterStemmer
 
+reload(sys)
+sys.setdefaultencoding('ISO-8859-1')
+
 # TODO ask if we're only allowed to submit one dictionary file => merging bigram and unigram dict together
 # TODO metadata dictionary
 # TODO faster computation for log frequency from Svilen
@@ -153,7 +156,7 @@ def build_unigram_dict(doc_id, doc_string):
     :param doc_string: the text of document corresponding to the given doc_id
     :return: None
     """
-    sentences = sent_tokenize(doc_string)
+    sentences = sent_tokenize(doc_string.decode('ISO-8859-1'))
     for sent in sentences:
         words = word_tokenize(sent)
         for word in words:
@@ -244,7 +247,6 @@ def build_trigram_dict(doc_id, doc_string):
                     trigram_dict[term][doc_id] = 1
 
 # def build_dict(doc_id, doc_string):
-
 
 def build_positional_index_dict(doc_id, doc_string):
     """
@@ -426,9 +428,15 @@ def write_meta_output(meta_dict, meta_count_dict, output_file_dictionary, output
 
 
 if __name__ == "__main__":
+<<<<<<< HEAD
     read_data_files_test(dataset_file)
     write_ngram_output(unigram_dict, unigram_count_dict, output_uni_dict, output_uni_postings)
     write_ngram_output(bigram_dict, bigram_count_dict, output_bi_dict, output_bi_postings)
     write_ngram_output(trigram_dict, trigram_count_dict, output_tri_dict, output_tri_postings)
+=======
+    read_data_files(dataset_file)
+    # write_ngram_output(unigram_dict, unigram_count_dict, output_uni_dict, output_uni_postings)
+    # write_ngram_output(bigram_dict, bigram_count_dict, output_bi_dict, output_bi_postings)
+>>>>>>> a13f964ce8beb716937f7b4c9449ad7538b81314
     write_positional_output(positional_dict, positional_count_dict, output_pos_dict, output_pos_postings)
     write_meta_output(meta_dict, meta_count_dict, output_meta_dict, output_meta_postings)
