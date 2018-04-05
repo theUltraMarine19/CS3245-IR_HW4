@@ -249,9 +249,9 @@ def write_ngram_output(ngram_dict, ngram_count_dict, output_file_dictionary, out
 
             posting = []
             for doc_id in doc_id_list:
-                values = [1 + math.log(i, 10) for i in doc_words[t[0]].values()]
+                values = [1 + math.log(i, 10) for i in doc_words[doc_id].values()]
                 norm_val = math.sqrt(sum(i ** 2 for i in values))
-                doc_norm[t[0]] = norm_val
+                doc_norm[doc_id] = norm_val
                 posting.append(str(doc_id) + '-' + str(doc_id_dict[doc_id]))
             # add a space at the end for distinguishing the current posting string from the next posting string
             posting_str = " ".join(str(e) for e in posting) + " "
