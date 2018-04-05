@@ -199,7 +199,6 @@ def build_bigram_dict(doc_id, doc_string):
 
 # def build_dict(doc_id, doc_string):
 
-
 def build_positional_index_dict(doc_id, doc_string):
     """
     Build a positional index with a single term as key and list of dictionaries with each element having doc ID as key, and the positions in the document as values
