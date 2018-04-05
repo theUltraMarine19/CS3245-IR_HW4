@@ -35,6 +35,8 @@ doc_words = dict()
 # the size of the training data set
 collection_size = 0
 
+csv.field_size_limit(sys.maxsize)
+
 # params:
 # -i dataset.csv -u unidict.txt --uni-postings unipostings.txt -b bidict.txt --bi-postings bipostings.txt -p posdict.txt --pos-postings pospostings.txt
 #- m metadict.txt --meta-postings metapostings.txt
