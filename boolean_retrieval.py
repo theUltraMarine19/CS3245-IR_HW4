@@ -1,3 +1,4 @@
+import sys
 def get_postings(term, dictionary, fp_postings):
     """
     This method returns the postings for a specific term from either dict1, dict2 or positional indexing.
@@ -33,9 +34,22 @@ def get_postings(term, dictionary, fp_postings):
                 postings_list = postings_string.split()
     
     elif len(term) == 3:
+        if term[0] in dictionary:
+            if term[1] in dictionary[term[0]]:
+                if term[2] in dictionary[term[0]][term[1]]:
+                    # TODO: if we don't have enough docIDs in postings for a given term, check more synonyms
+                    # TODO: since length 3, fist check synonyms for the first word, if not enough docIDs, check synonyms for 2. word etc.
+                    # if not in dict 2, call synonyms and check for each of the top synonym if in dict 2
+                    # else get postings for term from dictionary 2 from postings.txt
+                    fp_postings.seek(dictionary[term[0]][term[1]][term[2]]['H'])
+                    postings_string = fp_postings.read(dictionary[term[0]][term[1]][term[2]]['T'] - dictionary[term[0]][term[1]][term[2]]['H'])
+                    postings_list = postings_string.split()
+        # OR second approach:
         # complicated
         # make use of positional indexes for fetching the postings
-    else
+    else:
+        print "ERROR: phrase contains more than 3 terms"
+        sys.exit(2)
         # throw an error
     # if successfully reaches here without error, return fetched postings list
     return postings_list
@@ -69,39 +83,63 @@ def merge_lists(l1, l2):
 
 # TODO: Can we have boolean retrieval and free text in one query
 
-def order_by_size(term, dictionary, fp_postings):
+def order_by_size(term_list, dictionary, fp_postings):
     """
     Evaluates the size of the posting list of a given expression (if existing in the term dictionary).
-    :param term:
+    :param term_list:
     :param dictionary:
     :param fp_postings:
     :return: 0 - if not in the term dictionary
              document frequency of the term - if the term is present in the dictionary
     """
-    res = 0
-    term = term.strip()
-    expr_words = term.split()
-    if len(expr_words) == 1:
-        if term not in dictionary:
-            # TODO: check for synonyms
-            return 0
-        res = dictionary[term]['f']
-    elif len(expr_words) == 2:
-        word1 = expr_words[0]
-        word2 = expr_words[1]
-        if word1 not in dictionary:
-            # TODO: check for synonyms
-            return 0
-        elif word2 not in dictionary[word1]:
-            # TODO: check for synonyms
-            return 0
-        res = dictionary[word1][word2]
-    elif len(expr_words) == 3:
-        # TODO: use positional indexing
-        res = 0
-    else:
-        print "Incorrect input"
-    return res
+    smallest_index = 0
+    smallest_f = 18000
+    cur_index = 0
+    for term in term_list:
+        term = term.strip()
+        expr_words = term.split()
+        if len(expr_words) == 1:
+            if term not in dictionary:
+                # TODO: check for synonyms
+                return 0
+            res = dictionary[term]['f']
+        elif len(expr_words) == 2:
+            word1 = expr_words[0]
+            word2 = expr_words[1]
+            if word1 not in dictionary:
+                # TODO: check for synonyms
+                return 0
+            elif word2 not in dictionary[word1]:
+                # TODO: check for synonyms
+                return 0
+            res = dictionary[word1][word2]['f']
+        elif len(expr_words) == 3:
+            word1 = expr_words[0]
+            word2 = expr_words[1]
+            word3 = expr_words[2]
+            if word1 not in dictionary:
+                # TODO: check for synonyms
+                return 0
+            elif word2 not in dictionary[word1]:
+                # TODO: check for synonyms
+                return 0
+            elif word3 not in dictionary[word1][word2]:
+                return 0
+            # Approach 2 will be:
+            # TODO: use positional indexing
+            res = dictionary[word1][word2][word3]['f']
+        else:
+            print "Incorrect input"
+            return
+        if res < smallest_f:
+            smallest_index = cur_index
+        cur_index += 1
+    res_list = term_list
+    if smallest_index != 0:
+        tmp = res_list[smallest_index]
+        res_list[smallest_index] = res_list[0]
+        res_list[0] = tmp
+    return res_list
 
 # TODO: define get_synonyms as a new file or as a method
 
