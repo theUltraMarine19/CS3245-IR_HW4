@@ -10,4 +10,6 @@ metadict.txt
 metapostings.txt
 posdict.txt
 pospostings.txt
+dataset/
+index.sh
 
