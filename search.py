@@ -60,7 +60,6 @@ def main():
         br.bool_retrieve(query.split("AND"), term_dict1, term_dict2, fp_postings)
     else:
         # call freetext retrieval -> e.g freetextRetriev(query.split(' '))
-        # TODO: change with regex! -> separate by space only if no " " (phrases) in between) and remove " "
         separate_terms = re.findall(r'(?P<q_marks>\"(.*?)\")|(?P<s_word>\w+)', query)
         terms = []
         for b, q, s in separate_terms:
