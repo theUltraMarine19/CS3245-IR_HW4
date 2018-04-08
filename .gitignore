@@ -11,4 +11,4 @@ posdict.txt
 pospostings.txt
 dataset/
 index.sh
-
+*.pyc

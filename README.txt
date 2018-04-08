@@ -1,4 +1,4 @@
-This is the README file for A0179092W-A0175111U-A0179365N...'s submission
+This is the README file for A0179092W-A0175111U-A0179365N-A0179262X's submission
 
 == Python Version ==
 
@@ -33,7 +33,7 @@ The description of our approach and other important notes.
 
 == Statement of individual work ==
 
-[x] We, A0179092W-A0175111U-..., certify that we have followed the CS 3245 Information
+[x] We, A0179092W-A0175111U-A0179365N-A0179262X, certify that we have followed the CS 3245 Information
 Retrieval class guidelines for homework assignments.  In particular, we
 expressly vow that we have followed the Facebook rule in discussing
 with others in doing the assignment and did not take notes (digital or
@@ -42,6 +42,7 @@ printed) from the discussions.
 Emails: e0268461@u.nus.edu
 	e0268631@u.nus.edu
 	e0268734@u.nus.edu
+	e0268631@u.nus.edu
 	
 
 == References ==

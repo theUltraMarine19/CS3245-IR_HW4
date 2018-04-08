@@ -16,12 +16,12 @@ import freetext_retrieval as fr
 ==== Assignment 4 ====
 ======================
 
-- A0179092W-A0175111U-A0179365N
+- A0179092W-A0175111U-A0179365N-A0179262X
 '''
 
 term_dict1 = dict()
 term_dict2 = dict()
-fp_postings = open(postingsFile, 'r')
+
 
 def usage():
     print "usage: " + sys.argv[0] + " -d dictionary-file -p postings-file -q file-of-queries -o output-file-of-results"
@@ -51,8 +51,9 @@ if dictionary_file is None or postings_file is None or file_of_queries is None o
     sys.exit(2)
 
 
-
 def main():
+    #TODO: read query from file
+    fp_postings = open(postings_file, 'r')
     query = ''
     if "AND" in query:
         # call boolean retrieval -> e.g boolRetriev(query.split('AND'))
@@ -60,7 +61,16 @@ def main():
     else:
         # call freetext retrieval -> e.g freetextRetriev(query.split(' '))
         # TODO: change with regex! -> separate by space only if no " " (phrases) in between) and remove " "
-        fr.freetext_retrieve(query.split(), term_dict1, term_dict2, fp_postings)
+        separate_terms = re.findall(r'(?P<q_marks>\"(.*?)\")|(?P<s_word>\w+)', query)
+        terms = []
+        for b, q, s in separate_terms:
+            if b:
+                terms.append(b.replace('"', ''))
+            elif q:
+                terms.append(q)
+            elif s:
+                terms.append(s)
+        fr.freetext_retrieve(terms, term_dict1, term_dict2, fp_postings)
 
 if __name__ == "__main__":
     main()
