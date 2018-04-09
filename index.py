@@ -473,5 +473,4 @@ def write_meta_output(meta_dict, meta_count_dict, output_file_dictionary, output
 if __name__ == "__main__":
     read_data_files(dataset_file)
     write_ngram_dict_output(ngram_dictionary, ngram_dictionary_count_dict, output_ngram_dict, output_ngram_postings)
-    write_positional_output(positional_dict, positional_count_dict, output_pos_dict, output_pos_postings)
     write_meta_output(meta_dict, meta_count_dict, output_meta_dict, output_meta_postings)
