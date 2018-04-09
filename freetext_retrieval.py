@@ -17,55 +17,53 @@ def compute_log_tf(tf):
     return 1.0 + math.log10(tf) if tf != 0 else 0.0
 
 
-def tf_val_for_term(term, occurences, dictionary, fp_postings):
+def tf_val_for_term(term, occurrences, dictionary):
     """
     In this method a tf-idf vector for the term is build as in HW3.
     Need to handle synonyms for the terms that are not part of dict1 or dict 2.
     :param term:
-    :param occurences:
+    :param occurrences:
     :param dictionary:
-    :param fp_postings:
-    :return: the (?normalized) vector for the term
+    :return: the (?normalized) vector for the term,
     """
     if term not in dictionary:
         #TODO: chenage to synonyms
         return (0, None)
-    log_tf = 1.0 + math.log10(occurences) if occurences != 0 else 0.0
+    log_tf = 1.0 + math.log10(occurrences) if occurrences != 0 else 0.0
     log_idf = math.log10(float(dictionary['N'])/float(dictionary[term]['F']))
     # TODO: synonyms, return term
     return log_tf * log_idf, [term]
 
 
-def tf_val_for_phrase(phrasal_term, occurences, dictionary, fp_postings):
+def tf_val_for_phrase(phrasal_term, occurrences, dictionary):
     """
     New York university : Is this doc relevant? -> I went to York university at New York
     Compicated maths, think about how to make it comp
     :param phrasal_term:
-    :param occurences:
+    :param occurrences:
     :param dictionary:
-    :param fp_postings:
     :return:
     """
     if len(phrasal_term) == 2:
         term1 = phrasal_term[0]
         term2 = phrasal_term[1]
         if term1 not in dictionary:
-            return (0, None)
+            return 0, None
         if term2 not in dictionary[term1]:
-            return (0, None)
-        log_tf = 1.0 + math.log10(occurences) if occurences != 0 else 0.0
+            return 0, None
+        log_tf = 1.0 + math.log10(occurrences) if occurrences != 0 else 0.0
         log_idf = math.log10(float(dictionary['N'])/float(dictionary[term1][term2]['F']))
     else:
         term1 = phrasal_term[0]
         term2 = phrasal_term[1]
         term3 = phrasal_term[2]
         if term1 not in dictionary:
-            return (0, None)
+            return 0, None
         if term2 not in dictionary[term1]:
-            return (0, None)
+            return 0, None
         if term3 not in dictionary[term1][term2]:
-            return (0, None)
-        log_tf = 1.0 + math.log10(occurences) if occurences != 0 else 0.0
+            return 0, None
+        log_tf = 1.0 + math.log10(occurrences) if occurrences != 0 else 0.0
         log_idf = math.log10(float(dictionary['N'])/float(dictionary[term1][term2][term3]['F']))
 
     return log_tf * log_idf, phrasal_term

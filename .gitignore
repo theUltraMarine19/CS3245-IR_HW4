@@ -11,6 +11,7 @@ posdict.txt
 pospostings.txt
 dataset/
 index.sh
+dict.json
 *.pyc
 dataset.csv
 out/

@@ -51,10 +51,8 @@ def get_postings(term, dictionary, fp_postings):
                     # complicated
                     # make use of positional indexes for fetching the postings
     else:
-        print
-        "ERROR: phrase contains more than 3 terms"
+        print "ERROR: phrase contains more than 3 terms"
         sys.exit(2)
-        # throw an error
     # if successfully reaches here without error, return fetched postings list
 
     postings_list_tuple = []
