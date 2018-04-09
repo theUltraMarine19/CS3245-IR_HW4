@@ -57,4 +57,10 @@ def get_postings(term, dictionary, fp_postings):
         sys.exit(2)
         # throw an error
     # if successfully reaches here without error, return fetched postings list
-    return postings_list
+
+    postings_list_tuple = []
+    for e in postings_list:
+        e_list = e.split('-')
+        postings_list_tuple.append((int(e_list[0]),int(e_list[1])))
+        
+    return postings_list_tuple

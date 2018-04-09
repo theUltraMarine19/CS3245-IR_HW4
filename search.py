@@ -60,24 +60,26 @@ def main():
     term_dict = load_dict_file(dictionary_file)
     
     with open(file_of_queries, 'r') as fp:
-        query = fp.readlines()
-        if "AND" in query:
-            # call boolean retrieval -> e.g boolRetriev(query.split('AND'))
-            res = br.bool_retrieve(query.split("AND"), term_dict, fp_postings) 
-            print "bool " + res
-        else:
-            # call freetext retrieval -> e.g freetextRetriev(query.split(' '))
-            separate_terms = re.findall(r'(?P<q_marks>\"(.*?)\")|(?P<s_word>\w+)', query)
-            terms = []
-            for b, q, s in separate_terms:
-                if b:
-                    terms.append(b.replace('"', ''))
-                elif q:
-                    terms.append(q)
-                elif s:
-                    terms.append(s)
-            res = fr.freetext_retrieve(terms, term_dict, fp_postings)
-            print res
+        queries = fp.readlines()
+        for query in queries:
+            if "AND" in query:
+                # call boolean retrieval -> e.g boolRetriev(query.split('AND'))
+                res = br.bool_retrieve(query.split("AND"), term_dict, fp_postings) 
+                print "bool " + res
+            else:
+                # call freetext retrieval -> e.g freetextRetriev(query.split(' '))
+                separate_terms = re.findall(r'(?P<q_marks>\"(.*?)\")|(?P<s_word>\w+)', query)
+                terms = []
+                for b, q, s in separate_terms:
+                    if b:
+                        terms.append(b.replace('"', ''))
+                    elif q:
+                        terms.append(q)
+                    elif s:
+                        terms.append(s)
+                print terms
+                res = fr.freetext_retrieve(terms, term_dict, fp_postings)
+                print res
 
 if __name__ == "__main__":
     main()

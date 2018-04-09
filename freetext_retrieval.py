@@ -78,7 +78,7 @@ def freetext_retrieve(query, dictionary, fp_postings):
     :return: return the result of all relevant docIDs in decreasing order of priority using a heap (heapq module)
     """
     query_vec = []
-    doc_vecs = []
+    doc_vecs = {}
     stemmed_query = []
     for term in query:
         term = re.sub(r'[^a-zA-Z0-9]', '', str(term))
@@ -86,6 +86,7 @@ def freetext_retrieve(query, dictionary, fp_postings):
         stemmed_query.append(term)
     # remove words appearing more than once because we count them in the t_f computation below
     stemmed_query_set = set(stemmed_query)
+
     for term in stemmed_query_set:
         # TODO: Oscar: var naming: string_term is a list, not string
         string_term = term.split(' ')
@@ -94,6 +95,7 @@ def freetext_retrieve(query, dictionary, fp_postings):
             # TODO: important, return handled term
             val, new_term = tf_val_for_term(term, stemmed_query.count(term), dictionary, fp_postings)
             query_vec.append(val)
+            print val, new_term
         elif len(string_term) <= 3:
             # TODO: important, return handled term
             val, new_term = tf_val_for_phrase(term, stemmed_query.count(term), dictionary, fp_postings)
@@ -102,8 +104,8 @@ def freetext_retrieve(query, dictionary, fp_postings):
             print "Incorrect input"
             break
 
-        cur_docs = get_postings(new_term)
-        for doc, tf in cur_docs:
+        cur_docs = get_postings(new_term, dictionary, fp_postings)
+        for (doc, tf) in cur_docs:
             if new_term is None:
                 continue
             elif len(new_term) == 1:
@@ -112,6 +114,7 @@ def freetext_retrieve(query, dictionary, fp_postings):
                 norm = dictionary['DOC_NORM'][1][str(doc)]
             else:
                 norm = dictionary['DOC_NORM'][2][str(doc)]
+            # TODO- Check if tf can be 0
             t_f = 1 + math.log(tf, 10)
             val = t_f / norm
             if doc in doc_vecs:
