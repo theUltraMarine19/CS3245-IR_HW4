@@ -22,15 +22,18 @@ def tf_val_for_term(term, occurences, dictionary, fp_postings):
     In this method a tf-idf vector for the term is build as in HW3.
     Need to handle synonyms for the terms that are not part of dict1 or dict 2.
     :param term:
+    :param occurences:
     :param dictionary:
     :param fp_postings:
     :return: the (?normalized) vector for the term
     """
     if term not in dictionary:
+        #TODO: chenage to synonyms
         return (0, None)
-    log_tf = compute_log_tf(occurences)
+    log_tf = 1.0 + math.log10(occurences) if occurences != 0 else 0.0
     log_idf = math.log10(float(dictionary['N'])/float(dictionary[term]['F']))
-    return (log_tf * log_idf, [term])
+    # TODO: synonyms, return term
+    return log_tf * log_idf, [term]
 
 
 def tf_val_for_phrase(phrasal_term, occurences, dictionary, fp_postings):
@@ -38,6 +41,7 @@ def tf_val_for_phrase(phrasal_term, occurences, dictionary, fp_postings):
     New York university : Is this doc relevant? -> I went to York university at New York
     Compicated maths, think about how to make it comp
     :param phrasal_term:
+    :param occurences:
     :param dictionary:
     :param fp_postings:
     :return:
@@ -49,7 +53,7 @@ def tf_val_for_phrase(phrasal_term, occurences, dictionary, fp_postings):
             return (0, None)
         if term2 not in dictionary[term1]:
             return (0, None)
-        log_tf = compute_log_tf(occurences)
+        log_tf = 1.0 + math.log10(occurences) if occurences != 0 else 0.0
         log_idf = math.log10(float(dictionary['N'])/float(dictionary[term1][term2]['F']))
     else:
         term1 = phrasal_term[0]
@@ -61,10 +65,10 @@ def tf_val_for_phrase(phrasal_term, occurences, dictionary, fp_postings):
             return (0, None)
         if term3 not in dictionary[term1][term2]:
             return (0, None)
-        log_tf = compute_log_tf(occurences)
+        log_tf = 1.0 + math.log10(occurences) if occurences != 0 else 0.0
         log_idf = math.log10(float(dictionary['N'])/float(dictionary[term1][term2][term3]['F']))
 
-    return (log_tf * log_idf, phrasal_term)
+    return log_tf * log_idf, phrasal_term
 
 # TODO: define getSynonyms as a new file or as a method
 
@@ -89,7 +93,7 @@ def freetext_retrieve(query, dictionary, fp_postings):
 
     for term in stemmed_query_set:
         #TODO: Oscar: var naming: string_term is a list, not string
-        string_term = term.split(' ')
+        string_term = term.split()
         # don't check if term is in dictionary, because it will try to find synonyms in build_vec methods
         if len(string_term) == 1:
             # TODO: important, return handled term
@@ -114,8 +118,7 @@ def freetext_retrieve(query, dictionary, fp_postings):
                 norm = dictionary['DOC_NORM'][1][str(doc)]
             else:
                 norm = dictionary['DOC_NORM'][2][str(doc)]
-            # TODO- Check if tf can be 0
-            t_f = 1 + math.log(tf, 10)
+            t_f = 1 + math.log(tf, 10) if tf != 0 else 0.0
             val = t_f / norm
             new_term_string = ' '.join(new_term)
             if doc in doc_vecs:
