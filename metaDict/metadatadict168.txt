@@ -1,0 +1,1 @@
+{"court": {"CA Supreme Court": {"H": 0, "T": 8, "F": 1}}, "date_posted": {"1982-01-26 00:00:00": {"H": 8, "T": 16, "F": 1}}, "title": {"Harper v. The Queen [1982] 1 SCR 2": {"H": 16, "T": 24, "F": 1}}}

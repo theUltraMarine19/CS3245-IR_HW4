@@ -1,0 +1,1 @@
+{"court": {"Federal Court of Australia": {"H": 0, "T": 8, "F": 1}}, "date_posted": {"1995-02-10 00:00:00": {"H": 8, "T": 16, "F": 1}}, "title": {"Allstate Life Insurance Co & Ors v Australia & New Zealand Banking Group Ltd & Ors [1995] FCA 31": {"H": 16, "T": 24, "F": 1}}}

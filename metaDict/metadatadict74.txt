@@ -1,0 +1,1 @@
+{"court": {"NSW Court of Criminal Appeal": {"H": 0, "T": 8, "F": 1}}, "date_posted": {"2005-06-23 00:00:00": {"H": 8, "T": 16, "F": 1}}, "title": {"R v Youkhana [2005] NSWCCA 231": {"H": 16, "T": 24, "F": 1}}}

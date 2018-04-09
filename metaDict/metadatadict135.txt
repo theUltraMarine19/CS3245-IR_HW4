@@ -1,0 +1,1 @@
+{"court": {"SG Court of Appeal": {"H": 0, "T": 8, "F": 1}}, "date_posted": {"1997-08-14 00:00:00": {"H": 8, "T": 16, "F": 1}}, "title": {"Fun Seong Cheng v Public Prosecutor [1997] SGCA 35": {"H": 16, "T": 24, "F": 1}}}

@@ -29,7 +29,7 @@ def tf_val_for_term(term, occurences, dictionary, fp_postings):
     if term not in dictionary:
         return (0, None)
     log_tf = compute_log_tf(occurences)
-    log_idf = math.log10(dictionary['N']/dictionary[term]['F'])
+    log_idf = math.log10(float(dictionary['N'])/float(dictionary[term]['F']))
     return (log_tf * log_idf, [term])
 
 
@@ -50,7 +50,7 @@ def tf_val_for_phrase(phrasal_term, occurences, dictionary, fp_postings):
         if term2 not in dictionary[term1]:
             return (0, None)
         log_tf = compute_log_tf(occurences)
-        log_idf = math.log10(dictionary['N']/dictionary[term1][term2]['F'])
+        log_idf = math.log10(float(dictionary['N'])/float(dictionary[term1][term2]['F']))
     else:
         term1 = phrasal_term[0]
         term2 = phrasal_term[1]
@@ -62,7 +62,7 @@ def tf_val_for_phrase(phrasal_term, occurences, dictionary, fp_postings):
         if term3 not in dictionary[term1][term2]:
             return (0, None)
         log_tf = compute_log_tf(occurences)
-        log_idf = math.log10(dictionary['N']/dictionary[term1][term2][term3]['F'])
+        log_idf = math.log10(float(dictionary['N'])/float(dictionary[term1][term2][term3]['F']))
 
     return (log_tf * log_idf, phrasal_term)
 

@@ -1,0 +1,1 @@
+{"court": {"NSW Land and Environment Court": {"H": 0, "T": 8, "F": 1}}, "date_posted": {"2000-04-02 00:00:00": {"H": 8, "T": 16, "F": 1}}, "title": {"Director-General Department Of Land & Water Conservation - V - Pye (No 2) [1999] NSWLEC 45": {"H": 16, "T": 24, "F": 1}}}

@@ -1,0 +1,1 @@
+{"court": {"SG High Court": {"H": 0, "T": 8, "F": 1}}, "date_posted": {"1988-02-15 00:00:00": {"H": 8, "T": 16, "F": 1}}, "title": {"Seow Puay Seng v Public Prosecutor [1988] SGHC 16": {"H": 16, "T": 24, "F": 1}}}

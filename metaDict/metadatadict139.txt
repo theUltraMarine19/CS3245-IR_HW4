@@ -1,0 +1,1 @@
+{"court": {"SG High Court": {"H": 0, "T": 8, "F": 1}}, "date_posted": {"1996-08-12 00:00:00": {"H": 8, "T": 16, "F": 1}}, "title": {"Mohammad Ali bin Mohd Noor v Public Prosecutor [1996] SGHC 163": {"H": 16, "T": 24, "F": 1}}}

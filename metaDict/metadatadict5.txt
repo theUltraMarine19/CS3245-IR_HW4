@@ -1,0 +1,1 @@
+{"court": {"High Court of Australia": {"H": 0, "T": 8, "F": 1}}, "date_posted": {"2015-08-12 00:00:00": {"H": 8, "T": 16, "F": 1}}, "title": {"Filippou v The Queen [2015] HCA 29": {"H": 16, "T": 24, "F": 1}}}

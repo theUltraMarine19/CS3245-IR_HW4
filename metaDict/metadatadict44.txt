@@ -1,0 +1,1 @@
+{"court": {"CA Supreme Court": {"H": 0, "T": 8, "F": 1}}, "date_posted": {"2009-05-29 00:00:00": {"H": 8, "T": 16, "F": 1}}, "title": {"R. v. Nguyen [2009] 1 SCR 826; 2009 SCC 25": {"H": 16, "T": 24, "F": 1}}}
