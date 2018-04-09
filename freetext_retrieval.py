@@ -103,7 +103,14 @@ def freetext_retrieve(query, dictionary, fp_postings):
 
         cur_docs = get_postings(new_term)
         for doc, tf in cur_docs:
-            norm = dictionary['DOC_NORM'][str(doc)]
+            if new_term is None:
+                continue
+            elif len(new_term) == 1:
+                norm = dictionary['DOC_NORM'][0][str(doc)]
+            elif len(new_term) == 2:
+                norm = dictionary['DOC_NORM'][1][str(doc)]
+            else:
+                norm = dictionary['DOC_NORM'][2][str(doc)]
             t_f = 1 + math.log(tf, 10)
             val = t_f / norm
             if doc in doc_vecs:
