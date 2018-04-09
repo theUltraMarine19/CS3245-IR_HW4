@@ -40,15 +40,14 @@ csv.field_size_limit(sys.maxsize)
 
 def usage():
     print "usage: " + sys.argv[0] + " -i dataset_file -d ngram-dictionary-file --dp ngram-postings-file "\
-                                    "-p postional-dictionary-file --pp positional-postings-file" \
                                     "-m metadata-dictionary-file --mp metadata-postings-file"
 
 
 dataset_file = output_ngram_dict = output_ngram_postings = \
-    output_pos_dict = output_pos_postings = output_meta_dict = output_meta_postings = None
+    output_meta_dict = output_meta_postings = None
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], 'i:d:p:m:', ["dp=", "pp=", "mp="])
+    opts, args = getopt.getopt(sys.argv[1:], 'i:d:m:', ["dp=", "mp="])
 except getopt.GetoptError, err:
     usage()
     sys.exit(2)
@@ -60,10 +59,10 @@ for o, a in opts:
         output_ngram_dict = a
     elif o == '--dp':  # unigram postings file
         output_ngram_postings = a
-    elif o == '-p':  # positional dictionary file
-        output_pos_dict = a
-    elif o == '--pp':  # positional postings file
-        output_pos_postings = a
+    # elif o == '-p':  # positional dictionary file
+    #     output_pos_dict = a
+    # elif o == '--pp':  # positional postings file
+    #     output_pos_postings = a
     elif o == '-m':  # metadata dictionary file
         output_meta_dict = a
     elif o == '--mp':  # metadata postings file
@@ -72,7 +71,6 @@ for o, a in opts:
         assert False, "unhandled option"
 
 if dataset_file is None or output_ngram_dict is None or output_ngram_postings is None \
-        or output_pos_dict is None or output_pos_postings is None \
         or output_meta_dict is None or output_meta_postings is None:
     usage()
     sys.exit(2)
@@ -98,7 +96,7 @@ def read_data_files_test(input_dir):
             date_posted = row[3]
             court = row[4]
             build_ngram_dict(doc_id, content)
-            build_positional_index_dict(doc_id, content)
+            # build_positional_index_dict(doc_id, content)
             build_meta_dict(doc_id, title, content, date_posted, court)
             collection_size += 1
 
