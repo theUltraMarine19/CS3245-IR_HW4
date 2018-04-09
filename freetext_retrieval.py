@@ -42,7 +42,29 @@ def tf_val_for_phrase(phrasal_term, occurences, dictionary, fp_postings):
     :param fp_postings:
     :return:
     """
-    return []
+    if len(phrasal_term) == 2:
+        term1 = phrasal_term[0]
+        term2 = phrasal_term[1]
+        if term1 not in dictionary:
+            return (0, None)
+        if term2 not in dictionary[term1]:
+            return (0, None)
+        log_tf = compute_log_tf(occurences)
+        log_idf = math.log10(dictionary['N']/dictionary[term1][term2]['F'])
+    else:
+        term1 = phrasal_term[0]
+        term2 = phrasal_term[1]
+        term3 = phrasal_term[2]
+        if term1 not in dictionary:
+            return (0, None)
+        if term2 not in dictionary[term1]:
+            return (0, None)
+        if term3 not in dictionary[term1][term2]:
+            return (0, None)
+        log_tf = compute_log_tf(occurences)
+        log_idf = math.log10(dictionary['N']/dictionary[term1][term2][term3]['F'])
+
+    return (log_tf * log_idf, phrasal_term)
 
 # TODO: define getSynonyms as a new file or as a method
 

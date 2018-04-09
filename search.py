@@ -19,8 +19,11 @@ import freetext_retrieval as fr
 - A0179092W-A0175111U-A0179365N-A0179262X
 '''
 
-term_dict1 = dict()
-term_dict2 = dict()
+term_dict = {}
+
+def load_dict_file(dict_file):
+    with open(dict_file, 'r') as dictionary_f:
+        return json.load(dictionary_f)
 
 
 def usage():
@@ -55,9 +58,10 @@ def main():
     #TODO: read query from file
     fp_postings = open(postings_file, 'r')
     query = ''
+    term_dict = load_dict_file(dictionary_file)
     if "AND" in query:
         # call boolean retrieval -> e.g boolRetriev(query.split('AND'))
-        br.bool_retrieve(query.split("AND"), term_dict1, term_dict2, fp_postings)
+        br.bool_retrieve(query.split("AND"), term_dict, fp_postings)
     else:
         # call freetext retrieval -> e.g freetextRetriev(query.split(' '))
         separate_terms = re.findall(r'(?P<q_marks>\"(.*?)\")|(?P<s_word>\w+)', query)
@@ -69,7 +73,7 @@ def main():
                 terms.append(q)
             elif s:
                 terms.append(s)
-        fr.freetext_retrieve(terms, term_dict1, term_dict2, fp_postings)
+        fr.freetext_retrieve(terms, term_dict, fp_postings)
 
 if __name__ == "__main__":
     main()
