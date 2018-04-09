@@ -12,3 +12,4 @@ pospostings.txt
 dataset/
 index.sh
 *.pyc
+dataset.csv
