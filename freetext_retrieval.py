@@ -65,15 +65,16 @@ def freetext_retrieve(query, dictionary, fp_postings):
     # remove words appearing more than once because we count them in the t_f computation below
     stemmed_query_set = set(stemmed_query)
     for term in stemmed_query_set:
-        string_term = term.split()
+        # TODO: Oscar: var naming: string_term is a list, not string
+        string_term = term.split(' ')
         # don't check if term is in dictionary, because it will try to find synonyms in build_vec methods
         if len(string_term) == 1:
             # TODO: important, return handled term
-            val , new_term = tf_val_for_term(term, occurences, dictionary, fp_postings)
+            val, new_term = tf_val_for_term(term, stemmed_query.count(term), dictionary, fp_postings)
             query_vec.append(val)
         elif len(string_term) <= 3:
             # TODO: important, return handled term
-            val, new_term = tf_val_for_phrase(term, occurences, dictionary, fp_postings)
+            val, new_term = tf_val_for_phrase(term, stemmed_query.count(term), dictionary, fp_postings)
             query_vec.append(val)
         else:
             print "Incorrect input"
