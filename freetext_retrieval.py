@@ -2,6 +2,7 @@ import re
 from retrieve_postings import get_postings
 from nltk.stem.porter import PorterStemmer
 import math
+from operator import mul
 
 ps = PorterStemmer()
 
@@ -56,7 +57,6 @@ def freetext_retrieve(query, dictionary, fp_postings):
     """
     query_vec = []
     doc_vecs = []
-    res = []
     stemmed_query = []
     for term in query:
         term = re.sub(r'[^a-zA-Z0-9]', '', str(term))
@@ -88,6 +88,38 @@ def freetext_retrieve(query, dictionary, fp_postings):
                 doc_vecs[doc][new_term] = val
             else:
                 doc_vecs[doc] = {new_term: val}
-    # TODO: Discuss if this approach is fine with all team members, basically the same as HW3
-    # If the approach is approved, finish!
+
+    # Fill all document vectors with 0 for the query words they don't contain
+    norm_doc_vects = dict()
+    for word in stemmed_query_set:
+        if word in dictionary:
+            for doc, dic in doc_vecs.iteritems():
+                if word in dic:
+                    # if doc in the dict, append the next normalized value
+                    if doc in norm_doc_vects:
+                        norm_doc_vects[doc].append(dic[word])
+                    # if doc not in the dict of documents
+                    else:
+                        norm_doc_vects[doc] = [dic[word]]
+                # if the word does not appear in the document
+                else:
+                    if doc in norm_doc_vects:
+                        norm_doc_vects[doc].append(0)
+                    else:
+                        norm_doc_vects[doc] = [0]
+
+    q_vec_norm = math.sqrt(sum(i ** 2 for i in query_vec))
+    q_vec_norm = [x / q_vec_norm for x in query_vec]
+    res_vect = []
+    sorted_rel_docs = sorted(norm_doc_vects.keys())
+
+    for doc in sorted_rel_docs:
+        doc_vec = norm_doc_vects[doc]
+        similarity = sum(map(mul, q_vec_norm, doc_vec))
+        res_vect.append((doc, round(similarity, 15)))
+    # python sort method is stable and thus guarantee that docIDs with the same similarities
+    # will remain in increasing order since they were inserted in the res_vect list in that order
+    res_vect.sort(key=lambda x: x[1], reverse=True)
+    res = [i[0] for i in res_vect]
+
     return res
