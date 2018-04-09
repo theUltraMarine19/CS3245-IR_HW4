@@ -57,23 +57,27 @@ if dictionary_file is None or postings_file is None or file_of_queries is None o
 def main():
     #TODO: read query from file
     fp_postings = open(postings_file, 'r')
-    query = ''
     term_dict = load_dict_file(dictionary_file)
-    if "AND" in query:
-        # call boolean retrieval -> e.g boolRetriev(query.split('AND'))
-        br.bool_retrieve(query.split("AND"), term_dict, fp_postings)
-    else:
-        # call freetext retrieval -> e.g freetextRetriev(query.split(' '))
-        separate_terms = re.findall(r'(?P<q_marks>\"(.*?)\")|(?P<s_word>\w+)', query)
-        terms = []
-        for b, q, s in separate_terms:
-            if b:
-                terms.append(b.replace('"', ''))
-            elif q:
-                terms.append(q)
-            elif s:
-                terms.append(s)
-        fr.freetext_retrieve(terms, term_dict, fp_postings)
+    
+    with open(file_of_queries, 'r') as fp:
+        query = fp.readlines()
+        if "AND" in query:
+            # call boolean retrieval -> e.g boolRetriev(query.split('AND'))
+            res = br.bool_retrieve(query.split("AND"), term_dict, fp_postings) 
+            print "bool " + res
+        else:
+            # call freetext retrieval -> e.g freetextRetriev(query.split(' '))
+            separate_terms = re.findall(r'(?P<q_marks>\"(.*?)\")|(?P<s_word>\w+)', query)
+            terms = []
+            for b, q, s in separate_terms:
+                if b:
+                    terms.append(b.replace('"', ''))
+                elif q:
+                    terms.append(q)
+                elif s:
+                    terms.append(s)
+            res = fr.freetext_retrieve(terms, term_dict, fp_postings)
+            print res
 
 if __name__ == "__main__":
     main()
