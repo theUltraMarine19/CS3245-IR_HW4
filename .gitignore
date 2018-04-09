@@ -13,3 +13,4 @@ dataset/
 index.sh
 *.pyc
 dataset.csv
+out/
