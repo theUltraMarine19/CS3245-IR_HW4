@@ -30,7 +30,7 @@ def tf_val_for_term(term, occurences, dictionary, fp_postings):
         return (0, None)
     log_tf = compute_log_tf(occurences)
     log_idf = math.log10(dictionary['N']/dictionary[term]['F'])
-    return (log_tf * log_idf, term)
+    return (log_tf * log_idf, [term])
 
 
 def tf_val_for_phrase(phrasal_term, occurences, dictionary, fp_postings):
@@ -88,27 +88,27 @@ def freetext_retrieve(query, dictionary, fp_postings):
     stemmed_query_set = set(stemmed_query)
 
     for term in stemmed_query_set:
-        # TODO: Oscar: var naming: string_term is a list, not string
+        #TODO: Oscar: var naming: string_term is a list, not string
         string_term = term.split(' ')
         # don't check if term is in dictionary, because it will try to find synonyms in build_vec methods
         if len(string_term) == 1:
             # TODO: important, return handled term
             val, new_term = tf_val_for_term(term, stemmed_query.count(term), dictionary, fp_postings)
             query_vec.append(val)
-            print val, new_term
         elif len(string_term) <= 3:
             # TODO: important, return handled term
-            val, new_term = tf_val_for_phrase(term, stemmed_query.count(term), dictionary, fp_postings)
+            val, new_term = tf_val_for_phrase(string_term, stemmed_query.count(term), dictionary, fp_postings)
             query_vec.append(val)
         else:
             print "Incorrect input"
             break
 
+        if new_term is None:
+            continue
+
         cur_docs = get_postings(new_term, dictionary, fp_postings)
         for (doc, tf) in cur_docs:
-            if new_term is None:
-                continue
-            elif len(new_term) == 1:
+            if len(new_term) == 1:
                 norm = dictionary['DOC_NORM'][0][str(doc)]
             elif len(new_term) == 2:
                 norm = dictionary['DOC_NORM'][1][str(doc)]
@@ -117,10 +117,11 @@ def freetext_retrieve(query, dictionary, fp_postings):
             # TODO- Check if tf can be 0
             t_f = 1 + math.log(tf, 10)
             val = t_f / norm
+            new_term_string = ' '.join(new_term)
             if doc in doc_vecs:
-                doc_vecs[doc][new_term] = val
+                doc_vecs[doc][new_term_string] = val
             else:
-                doc_vecs[doc] = {new_term: val}
+                doc_vecs[doc] = {new_term_string: val}
 
     # Fill all document vectors with 0 for the query words they don't contain
     norm_doc_vects = dict()
@@ -141,6 +142,8 @@ def freetext_retrieve(query, dictionary, fp_postings):
                     else:
                         norm_doc_vects[doc] = [0]
 
+    print query_vec
+    # TODO - get divison by zero error here with phrasal queries, need to check
     q_vec_norm = math.sqrt(sum(i ** 2 for i in query_vec))
     q_vec_norm = [x / q_vec_norm for x in query_vec]
     res_vect = []
