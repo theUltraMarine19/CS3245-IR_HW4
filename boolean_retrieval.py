@@ -1,6 +1,5 @@
 from retrieve_postings import get_postings
 
-
 def merge_lists(l1, l2):
     """
     Create a list of all elements that are common for both lists.
