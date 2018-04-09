@@ -5,6 +5,17 @@ import math
 
 ps = PorterStemmer()
 
+
+def compute_log_tf(tf):
+    """
+    Calcluates the the logarithmic value of the given term frequency
+    :param tf: term frequency
+    :return: type float, the logarithmic value of the term frequency
+    """
+    # formula: 1 + log_10(term frequency)
+    return 1.0 + math.log10(tf) if tf != 0 else 0.0
+
+
 def tf_val_for_term(term, occurences, dictionary, fp_postings):
     """
     In this method a tf-idf vector for the term is build as in HW3.
@@ -14,7 +25,11 @@ def tf_val_for_term(term, occurences, dictionary, fp_postings):
     :param fp_postings:
     :return: the (?normalized) vector for the term
     """
-    return []
+    if term not in dictionary:
+        return (0, None)
+    log_tf = compute_log_tf(occurences)
+    log_idf = math.log10(dictionary['N']/dictionary[term]['F'])
+    return (log_tf * log_idf, term)
 
 
 def tf_val_for_phrase(phrasal_term, occurences, dictionary, fp_postings):
@@ -55,11 +70,11 @@ def freetext_retrieve(query, dictionary, fp_postings):
         if len(string_term) == 1:
             # TODO: important, return handled term
             val , new_term = tf_val_for_term(term, occurences, dictionary, fp_postings)
-            query_vec.append(vec)
+            query_vec.append(val)
         elif len(string_term) <= 3:
             # TODO: important, return handled term
             val, new_term = tf_val_for_phrase(term, occurences, dictionary, fp_postings)
-            query_vec.append(vec)
+            query_vec.append(val)
         else:
             print "Incorrect input"
             break
