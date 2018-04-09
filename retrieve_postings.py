@@ -10,16 +10,15 @@ def get_postings(term, dictionary, fp_postings):
     :return: postings for the given term
     """
     # TODO: term is still a string make sure it's a list or check for word count
-
     if len(term) == 1:
         # check if its a single word
         # check if term in dictionary 1
-        if term in dictionary:
+        if term[0] in dictionary:
             # TODO: if we don't have enough docIDs in postings for a given term, check more synonyms
             # if not in dict 1, call synonyms and check for each of the top synonym if in dict 1
             # else get postings for term from dictionary 1 from postings.txt
-            fp_postings.seek(dictionary[term]['H'])
-            postings_string = fp_postings.read(dictionary[term]['T'] - dictionary[term]['H'])
+            fp_postings.seek(dictionary[term[0]]['H'])
+            postings_string = fp_postings.read(dictionary[term[0]]['T'] - dictionary[term[0]]['H'])
             postings_list = postings_string.split()
 
     elif len(term) == 2:
@@ -62,5 +61,5 @@ def get_postings(term, dictionary, fp_postings):
     for e in postings_list:
         e_list = e.split('-')
         postings_list_tuple.append((int(e_list[0]),int(e_list[1])))
-        
+
     return postings_list_tuple

@@ -77,7 +77,6 @@ def main():
                         terms.append(q)
                     elif s:
                         terms.append(s)
-                print terms
                 res = fr.freetext_retrieve(terms, term_dict, fp_postings)
                 print res
 
