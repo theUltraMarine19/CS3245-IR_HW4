@@ -120,10 +120,6 @@ def read_data_files(input_dir):
             content = row[2]
             date_posted = row[3]
             court = row[4]
-            # content = unicode(content, errors='ignore')
-            # content = content.decode(encoding='ascii', errors='ignore')
-            # content.decode
-            # unicode(content, errors='ignore')
             build_ngram_dict(doc_id, content)
             build_positional_index_dict(doc_id, content)
             build_meta_dict(doc_id, title, content, date_posted, court)
@@ -342,9 +338,9 @@ def write_ngram_dict_output(ngram_dict, ngram_count_dict, output_file_dictionary
     with open(output_file_postings, 'w') as out_postings:
         # term_dict has term as key, doc_id_dict as value
         # doc_id_dict has doc id as key, term frequency corresponding to the doc id as value
-        doc_norm1 = dict()
-        doc_norm2 = dict()
-        doc_norm3 = dict()
+        doc_norm1 = {}
+        doc_norm2 = {}
+        doc_norm3 = {}
 
         for term1, doc_id_dict1 in ngram_dict.iteritems():
             unigram_posting = []
@@ -475,8 +471,7 @@ def write_meta_output(meta_dict, meta_count_dict, output_file_dictionary, output
 
 
 if __name__ == "__main__":
-    read_data_files_test(dataset_file)
-    # print(ngram_dictionary)
+    read_data_files(dataset_file)
     write_ngram_dict_output(ngram_dictionary, ngram_dictionary_count_dict, output_ngram_dict, output_ngram_postings)
     write_positional_output(positional_dict, positional_count_dict, output_pos_dict, output_pos_postings)
     write_meta_output(meta_dict, meta_count_dict, output_meta_dict, output_meta_postings)
