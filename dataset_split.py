@@ -10,7 +10,7 @@ csv.field_size_limit(sys.maxsize)
 with open('dataset.csv', 'rb') as csv_file:
 	reader = csv.reader(csv_file, delimiter=',', )
 	file_ctr = 1
-	num_lines = 100
+	num_lines = 1
 	output_dir = os.path.join('output/', 'dataset_%s.csv' % file_ctr)
 
 	writer = csv.writer(open(output_dir, 'w'), delimiter = ',')
@@ -21,14 +21,14 @@ with open('dataset.csv', 'rb') as csv_file:
 	print "Hello"
 
 	for index, row in enumerate(reader):
-		print "I'm in"
+		# print "I'm in"
 		if index+1 > num_lines:
 			file_ctr += 1
-			num_lines = 100 * file_ctr
+			num_lines = 1 * file_ctr
 			output_dir = os.path.join('output/', 'dataset_%s.csv' % file_ctr)
 			writer = csv.writer(open(output_dir, 'w'), delimiter = ',')
 			writer.writerow(headers)
 		writer.writerow(row)
-		print index
+		# print index
 
 
