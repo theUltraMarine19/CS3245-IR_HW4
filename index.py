@@ -19,8 +19,8 @@ sys.setdefaultencoding('ISO-8859-1')
 
 ngram_dictionary = {}
 ngram_dictionary_count_dict = {}
-# positional_dict = {}
-# positional_count_dict = {}
+positional_dict = {}
+positional_count_dict = {}
 meta_dict = {"title":{}, "date_posted":{}, "court":{}}
 meta_count_dict = {"title":{}, "date_posted":{}, "court":{}}
 
@@ -29,7 +29,6 @@ ps = PorterStemmer()
 
 doc_words1 = dict()
 doc_words2 = dict()
-doc_words3 = dict()
 
 # the size of the training data set
 collection_size = 0
@@ -41,14 +40,15 @@ csv.field_size_limit(sys.maxsize)
 
 def usage():
     print "usage: " + sys.argv[0] + " -i dataset_file -d ngram-dictionary-file --dp ngram-postings-file "\
+                                    "-p postional-dictionary-file --pp positional-postings-file" \
                                     "-m metadata-dictionary-file --mp metadata-postings-file"
 
 
 dataset_file = output_ngram_dict = output_ngram_postings = \
-    output_meta_dict = output_meta_postings = None
+    output_pos_dict = output_pos_postings = output_meta_dict = output_meta_postings = None
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], 'i:d:m:', ["dp=", "mp="])
+    opts, args = getopt.getopt(sys.argv[1:], 'i:d:p:m:', ["dp=", "pp=", "mp="])
 except getopt.GetoptError, err:
     usage()
     sys.exit(2)
@@ -60,10 +60,10 @@ for o, a in opts:
         output_ngram_dict = a
     elif o == '--dp':  # unigram postings file
         output_ngram_postings = a
-    # elif o == '-p':  # positional dictionary file
-    #     output_pos_dict = a
-    # elif o == '--pp':  # positional postings file
-    #     output_pos_postings = a
+    elif o == '-p':  # positional dictionary file
+        output_pos_dict = a
+    elif o == '--pp':  # positional postings file
+        output_pos_postings = a
     elif o == '-m':  # metadata dictionary file
         output_meta_dict = a
     elif o == '--mp':  # metadata postings file
@@ -72,7 +72,7 @@ for o, a in opts:
         assert False, "unhandled option"
 
 if dataset_file is None or output_ngram_dict is None or output_ngram_postings is None \
-        or output_meta_dict is None or output_meta_postings is None:
+        or output_pos_dict is None or output_pos_postings is None or output_meta_dict is None or output_meta_postings is None:
     usage()
     sys.exit(2)
 
@@ -100,7 +100,7 @@ def read_data_files_test(input_dir):
                 date_posted = row[3]
                 court = row[4]
                 build_ngram_dict(doc_id, content)
-                # build_positional_index_dict(doc_id, content)
+                build_positional_index_dict(doc_id, content)
                 build_meta_dict(doc_id, title, content, date_posted, court)
                 collection_size += 1
 
@@ -123,7 +123,7 @@ def read_data_files(input_dir):
             date_posted = row[3]
             court = row[4]
             build_ngram_dict(doc_id, content)
-            # build_positional_index_dict(doc_id, content)
+            build_positional_index_dict(doc_id, content)
             build_meta_dict(doc_id, title, content, date_posted, court)
             collection_size += 1
 
@@ -166,29 +166,6 @@ def build_ngram_dict(doc_id, doc_string):
                         else:
                             ngram_dictionary[term1][term2] = {}
                             ngram_dictionary[term1][term2][doc_id] = 1
-
-                        if i <= (len(words) - 3):
-                            word3 = words[i+2]
-                            term3 = re.sub(r'[^a-zA-Z0-9]', '', str(word3))
-                            term3 = ps.stem(term3.lower())
-
-                            if len(term3) != 0:
-                                if term3 in ngram_dictionary[term1][term2]:
-                                    if doc_id in ngram_dictionary[term1][term2][term3]:
-                                        ngram_dictionary[term1][term2][term3][doc_id] += 1
-                                    else:
-                                        ngram_dictionary[term1][term2][term3][doc_id] = 1
-                                else:
-                                    ngram_dictionary[term1][term2][term3] = {}
-                                    ngram_dictionary[term1][term2][term3][doc_id] = 1
-
-                                if doc_id in doc_words3:
-                                    if term1 + " " + term2 + " " + term3 in doc_words3[doc_id]:
-                                        doc_words3[doc_id][term1 + " " + term2 + " " + term3] += 1
-                                    else:
-                                        doc_words3[doc_id][term1 + " " + term2 + " " + term3] = 1
-                                else:
-                                    doc_words3[doc_id] = {term1 + " " + term2 + " " + term3: 1}
 
                         if doc_id in doc_words2:
                             if term1 + " " + term2 in doc_words2[doc_id]:
@@ -342,7 +319,6 @@ def write_ngram_dict_output(ngram_dict, ngram_count_dict, output_file_dictionary
         # doc_id_dict has doc id as key, term frequency corresponding to the doc id as value
         doc_norm1 = {}
         doc_norm2 = {}
-        doc_norm3 = {}
 
         for term1, doc_id_dict1 in ngram_dict.iteritems():
             unigram_posting = []
@@ -352,33 +328,13 @@ def write_ngram_dict_output(ngram_dict, ngram_count_dict, output_file_dictionary
                     term2 = term_or_doc_id1
                     bigram_posting = []
 
+                    # handle bigram
                     for term_or_doc_id2, dict_or_tf2 in dict_or_tf1.iteritems():
-                        if type(dict_or_tf2) is dict:
-                            # handle trigram
-                            term3 = term_or_doc_id2
-                            trigram_posting = []
-
-                            for term_or_doc_id3, dict_or_tf3 in dict_or_tf2.iteritems():
-                                if term_or_doc_id3 not in doc_norm3:
-                                    values3 = [1 + math.log(i, 10) for i in doc_words3[term_or_doc_id3].values()]
-                                    norm_val3 = math.sqrt(sum(i ** 2 for i in values3))
-                                    doc_norm3[term_or_doc_id3] = norm_val3
-                                trigram_posting.append(str(term_or_doc_id3) + '-' + str(dict_or_tf3))
-
-                            posting_str3 = " ".join(str(e) for e in trigram_posting) + " "
-
-                            head3 = out_postings.tell()
-                            out_postings.write(posting_str3)
-                            freq3 = len(trigram_posting)
-                            tail3 = out_postings.tell()
-                            build_trigram_dictionary_count_dict(ngram_count_dict, term1, term2, term3, head3, tail3, freq3)
-                        else:
-                            # handle bigram
-                            if term_or_doc_id2 not in doc_norm2:
-                                values2 = [1 + math.log(i, 10) for i in doc_words2[term_or_doc_id2].values()]
-                                norm_val2 = math.sqrt(sum(i ** 2 for i in values2))
-                                doc_norm2[term_or_doc_id2] = norm_val2
-                            bigram_posting.append(str(term_or_doc_id2) + '-' + str(dict_or_tf2))
+                        if term_or_doc_id2 not in doc_norm2:
+                            values2 = [1 + math.log(i, 10) for i in doc_words2[term_or_doc_id2].values()]
+                            norm_val2 = math.sqrt(sum(i ** 2 for i in values2))
+                            doc_norm2[term_or_doc_id2] = norm_val2
+                        bigram_posting.append(str(term_or_doc_id2) + '-' + str(dict_or_tf2))
                     
                     posting_str2 = " ".join(str(e) for e in bigram_posting) + " "
 
@@ -407,7 +363,7 @@ def write_ngram_dict_output(ngram_dict, ngram_count_dict, output_file_dictionary
     with open(output_file_dictionary, 'w') as out_dict:
         all_doc_ids.sort()
         ngram_count_dict['N'] = collection_size
-        ngram_count_dict['DOC_NORM'] = (doc_norm1, doc_norm2, doc_norm3)
+        ngram_count_dict['DOC_NORM'] = (doc_norm1, doc_norm2)
         json.dump(ngram_count_dict, out_dict)
 
 
@@ -473,6 +429,7 @@ def write_meta_output(meta_dict, meta_count_dict, output_file_dictionary, output
 
 
 if __name__ == "__main__":
-    read_data_files(dataset_file)
+    read_data_files_test(dataset_file)
     write_ngram_dict_output(ngram_dictionary, ngram_dictionary_count_dict, output_ngram_dict, output_ngram_postings)
+    write_positional_output(positional_dict, positional_count_dict, output_pos_dict, output_pos_postings)
     write_meta_output(meta_dict, meta_count_dict, output_meta_dict, output_meta_postings)
