@@ -80,5 +80,7 @@ def main():
                 res = fr.freetext_retrieve(terms, term_dict, fp_postings)
                 print res
 
+
+
 if __name__ == "__main__":
     main()

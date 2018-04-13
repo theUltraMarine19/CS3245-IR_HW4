@@ -28,7 +28,6 @@ all_doc_ids = []
 ps = PorterStemmer()
 
 doc_words1 = dict()
-doc_words2 = dict()
 
 # the size of the training data set
 collection_size = 0
@@ -37,6 +36,7 @@ csv.field_size_limit(sys.maxsize)
 
 # params:
 # -i dataset.csv -d dict.txt --dp postings.txt -p posdict.txt --pp pospostings.txt -m metadict.txt --mp metapostings.txt
+# -i output/ -d dict.txt --dp postings.txt -p posdict.txt --pp pospostings.txt -m metadict.txt --mp metapostings.txt
 
 def usage():
     print "usage: " + sys.argv[0] + " -i dataset_file -d ngram-dictionary-file --dp ngram-postings-file "\
@@ -84,9 +84,9 @@ def read_data_files_test(input_dir):
     :return: None
     """
     global collection_size
-    allDocs = os.listdir(input_dir)
+    all_docs = os.listdir(input_dir)
 
-    for doc in allDocs:
+    for doc in all_docs:
         with open(doc, 'rb') as csv_file:
             data_reader = csv.reader(csv_file, delimiter=',', )
             for index, row in enumerate(data_reader):
@@ -112,20 +112,28 @@ def read_data_files(input_dir):
     :return: None
     """
     global collection_size
-    with open(input_dir, 'rb') as csv_file:
-        data_reader = csv.reader(csv_file, delimiter=',', )
-        for index, row in enumerate(data_reader):
-            if index == 0:
-                continue
-            doc_id = int(row[0])
-            title = row[1]
-            content = row[2]
-            date_posted = row[3]
-            court = row[4]
-            build_ngram_dict(doc_id, content)
-            build_positional_index_dict(doc_id, content)
-            build_meta_dict(doc_id, title, content, date_posted, court)
-            collection_size += 1
+    all_docs = os.listdir(input_dir)
+
+    os.chdir(input_dir)
+    i=0
+    for doc in all_docs:
+        i+=1
+        print i
+        with open(doc, 'rb') as csv_file:
+            data_reader = csv.reader(csv_file, delimiter=',', )
+            for index, row in enumerate(data_reader):
+                if index == 0:
+                    continue
+                doc_id = int(row[0])
+                title = row[1]
+                content = row[2]
+                date_posted = row[3]
+                court = row[4]
+                build_ngram_dict(doc_id, content)
+                build_positional_index_dict(doc_id, content)
+                build_meta_dict(doc_id, title, content, date_posted, court)
+                collection_size += 1
+    os.chdir(r'..')
 
 def build_ngram_dict(doc_id, doc_string):
     """
@@ -151,29 +159,6 @@ def build_ngram_dict(doc_id, doc_string):
                 else:
                     ngram_dictionary[term1] = {}
                     ngram_dictionary[term1][doc_id] = 1
-
-                if i <= (len(words) - 2):
-                    word2 = words[i+1]
-                    term2 = re.sub(r'[^a-zA-Z0-9]', '', str(word2))
-                    term2 = ps.stem(term2.lower())
-
-                    if len(term2) != 0:
-                        if term2 in ngram_dictionary[term1]:
-                            if doc_id in ngram_dictionary[term1][term2]:
-                                ngram_dictionary[term1][term2][doc_id] += 1
-                            else:
-                                ngram_dictionary[term1][term2][doc_id] = 1
-                        else:
-                            ngram_dictionary[term1][term2] = {}
-                            ngram_dictionary[term1][term2][doc_id] = 1
-
-                        if doc_id in doc_words2:
-                            if term1 + " " + term2 in doc_words2[doc_id]:
-                                doc_words2[doc_id][term1 + " " + term2] += 1
-                            else:
-                                doc_words2[doc_id][term1 + " " + term2] = 1
-                        else:
-                            doc_words2[doc_id] = {term1 + " " + term2: 1}
 
                 # build the length add-on to the free text retrieval
                 if doc_id in doc_words1:
@@ -318,39 +303,17 @@ def write_ngram_dict_output(ngram_dict, ngram_count_dict, output_file_dictionary
         # term_dict has term as key, doc_id_dict as value
         # doc_id_dict has doc id as key, term frequency corresponding to the doc id as value
         doc_norm1 = {}
-        doc_norm2 = {}
 
         for term1, doc_id_dict1 in ngram_dict.iteritems():
             unigram_posting = []
 
             for term_or_doc_id1, dict_or_tf1 in doc_id_dict1.iteritems():
-                if type(dict_or_tf1) is dict:
-                    term2 = term_or_doc_id1
-                    bigram_posting = []
-
-                    # handle bigram
-                    for term_or_doc_id2, dict_or_tf2 in dict_or_tf1.iteritems():
-                        if term_or_doc_id2 not in doc_norm2:
-                            values2 = [1 + math.log(i, 10) for i in doc_words2[term_or_doc_id2].values()]
-                            norm_val2 = math.sqrt(sum(i ** 2 for i in values2))
-                            doc_norm2[term_or_doc_id2] = norm_val2
-                        bigram_posting.append(str(term_or_doc_id2) + '-' + str(dict_or_tf2))
-                    
-                    posting_str2 = " ".join(str(e) for e in bigram_posting) + " "
-
-                    head2 = out_postings.tell()
-                    out_postings.write(posting_str2)
-                    freq2 = len(bigram_posting)
-                    tail2 = out_postings.tell()
-                    build_bigram_dictionary_count_dict(ngram_count_dict, term1, term2, head2, tail2, freq2)
-
-                else:
-                    # handle unigram
-                    if term_or_doc_id1 not in doc_norm1:
-                        values1 = [1 + math.log(i, 10) for i in doc_words1[term_or_doc_id1].values()]
-                        norm_val1 = math.sqrt(sum(i ** 2 for i in values1))
-                        doc_norm1[term_or_doc_id1] = norm_val1
-                    unigram_posting.append(str(term_or_doc_id1) + '-' + str(dict_or_tf1))
+                # handle unigram
+                if term_or_doc_id1 not in doc_norm1:
+                    values1 = [1 + math.log(i, 10) for i in doc_words1[term_or_doc_id1].values()]
+                    norm_val1 = math.sqrt(sum(i ** 2 for i in values1))
+                    doc_norm1[term_or_doc_id1] = norm_val1
+                unigram_posting.append(str(term_or_doc_id1) + '-' + str(dict_or_tf1))
             
             posting_str1 = " ".join(str(e) for e in unigram_posting) + " "
 
@@ -363,7 +326,7 @@ def write_ngram_dict_output(ngram_dict, ngram_count_dict, output_file_dictionary
     with open(output_file_dictionary, 'w') as out_dict:
         all_doc_ids.sort()
         ngram_count_dict['N'] = collection_size
-        ngram_count_dict['DOC_NORM'] = (doc_norm1, doc_norm2)
+        ngram_count_dict['DOC_NORM'] = doc_norm1
         json.dump(ngram_count_dict, out_dict)
 
 
@@ -429,7 +392,7 @@ def write_meta_output(meta_dict, meta_count_dict, output_file_dictionary, output
 
 
 if __name__ == "__main__":
-    read_data_files_test(dataset_file)
+    read_data_files(dataset_file)
     write_ngram_dict_output(ngram_dictionary, ngram_dictionary_count_dict, output_ngram_dict, output_ngram_postings)
     write_positional_output(positional_dict, positional_count_dict, output_pos_dict, output_pos_postings)
     write_meta_output(meta_dict, meta_count_dict, output_meta_dict, output_meta_postings)
