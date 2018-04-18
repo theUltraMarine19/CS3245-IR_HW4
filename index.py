@@ -74,24 +74,21 @@ def read_data_files_test(input_dir):
     :return: None
     """
     global collection_size
-    all_docs = os.listdir(input_dir)
-
-    for doc in all_docs:
-        with open(doc, 'rb') as csv_file:
-            data_reader = csv.reader(csv_file, delimiter=',', )
-            for index, row in enumerate(data_reader):
-                if index == 0:
-                    continue
-                if index >= 2:
-                    break
-                doc_id = row[0]
-                title = row[1]
-                content = row[2]
-                date_posted = row[3]
-                court = row[4]
-                build_positional_index_dict(doc_id, content)
-                build_meta_dict(doc_id, title, content, date_posted, court)
-                collection_size += 1
+    with open(input_dir, 'rb') as csv_file:
+        data_reader = csv.reader(csv_file, delimiter=',', )
+        for index, row in enumerate(data_reader):
+            if index == 0:
+                continue
+            if index >= 2:
+                break
+            doc_id = row[0]
+            title = row[1]
+            content = row[2]
+            date_posted = row[3]
+            court = row[4]
+            build_positional_index_dict(doc_id, content)
+            build_meta_dict(doc_id, title, content, date_posted, court)
+            collection_size += 1
 
 
 def read_data_files(input_dir):
@@ -101,27 +98,19 @@ def read_data_files(input_dir):
     :return: None
     """
     global collection_size
-    all_docs = os.listdir(input_dir)
-
-    os.chdir(input_dir)
-    i=0
-    for doc in all_docs:
-        i+=1
-        print i
-        with open(doc, 'rb') as csv_file:
-            data_reader = csv.reader(csv_file, delimiter=',', )
-            for index, row in enumerate(data_reader):
-                if index == 0:
-                    continue
-                doc_id = int(row[0])
-                title = row[1]
-                content = row[2]
-                date_posted = row[3]
-                court = row[4]
-                build_positional_index_dict(doc_id, content)
-                build_meta_dict(doc_id, title, content, date_posted, court)
-                collection_size += 1
-    os.chdir(r'..')
+    with open(input_dir, 'rb') as csv_file:
+        data_reader = csv.reader(csv_file, delimiter=',', )
+        for index, row in enumerate(data_reader):
+            if index == 0:
+                continue
+            doc_id = row[0]
+            title = row[1]
+            content = row[2]
+            date_posted = row[3]
+            court = row[4]
+            build_positional_index_dict(doc_id, content)
+            build_meta_dict(doc_id, title, content, date_posted, court)
+            collection_size += 1
 
 
 def build_positional_index_dict(doc_id, doc_string):
