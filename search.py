@@ -3,9 +3,6 @@ import sys
 import getopt
 import math
 import re
-from nltk.tokenize import word_tokenize
-from operator import mul
-from nltk.stem.porter import PorterStemmer
 
 import boolean_retrieval as br
 import freetext_retrieval as fr
@@ -62,24 +59,21 @@ def main():
     
     with open(file_of_queries, 'r') as fp:
         query = fp.readlines()
-        for q in query:
-            if "AND" in q:
-                # call boolean retrieval -> e.g boolRetriev(query.split('AND'))
-                res = br.bool_retrieve(query.split("AND"), term_dictionary, fp_postings)
-                print "bool " + res
-            else:
-                # call freetext retrieval -> e.g freetextRetriev(query.split(' '))
-                separate_terms = re.findall(r'(?P<q_marks>\"(.*?)\")|(?P<s_word>\w+)', q)
-                terms = []
-                for b, q, s in separate_terms:
-                    if b:
-                        terms.append(b.replace('"', ''))
-                    elif q:
-                        terms.append(q)
-                    elif s:
-                        terms.append(s)
-                res = fr.freetext_retrieve(terms, term_dictionary, fp_postings)
-                print res
+        if "AND" in query[0]:
+            # call boolean retrieval -> e.g boolRetriev(query.split('AND'))
+            res = br.bool_retrieve(query[0].split("AND"), term_dictionary, fp_postings)
+        else:
+            # call freetext retrieval -> e.g freetextRetriev(query.split(' '))
+            separate_terms = re.findall(r'(?P<q_marks>\"(.*?)\")|(?P<s_word>\w+)', query[0])
+            terms = []
+            for b, q, s in separate_terms:
+                if b:
+                    terms.append(b.replace('"', ''))
+                elif q:
+                    terms.append(q)
+                elif s:
+                    terms.append(s)
+            res = fr.freetext_retrieve(terms, term_dictionary, fp_postings)
 
     with open(file_of_output, 'w') as out:
         out_str = str()

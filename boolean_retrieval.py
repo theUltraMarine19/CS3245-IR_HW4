@@ -1,4 +1,8 @@
 from retrieve_postings import get_postings
+import re
+from nltk.stem.porter import PorterStemmer
+
+ps = PorterStemmer()
 
 def merge_lists(l1, l2):
     """
@@ -76,7 +80,14 @@ def bool_retrieve(query, dictionary, fp_postings):
     :return: return the result of all relevant docIDs
     """
     res = []
+    start = True
     for term in query:
+        term = term.strip()
+        term = re.sub(r'[^a-zA-Z0-9]', '', str(term))
+        term = ps.stem(term.lower())
         term_postings = get_postings(term.split(), dictionary, fp_postings)
-        res = merge_lists(res, term_postings)
+        if start:
+            res = term_postings
+        else:
+            res = merge_lists(res, term_postings)
     return res

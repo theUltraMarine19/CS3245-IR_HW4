@@ -91,6 +91,7 @@ def get_postings(term, dictionary, fp_postings):
     :param fp_postings:
     :return: postings for the given term
     """
+    postings_list = []
     if type(term) != list:
         term_list = term.split()
     else:
@@ -110,7 +111,7 @@ def get_postings(term, dictionary, fp_postings):
             postings_list = [doc_id_position_string.split("-") for doc_id_position_string in postings_list]
             postings_list = [(doc_id_position_list[0], len(doc_id_position_list) - 1) for doc_id_position_list in
                              postings_list]
-            return postings_list
+            # return postings_list
 
     elif len(term_list) == 2:
         # for terms of length 2, use the format of double indexing in dict'
@@ -167,10 +168,10 @@ def get_postings(term, dictionary, fp_postings):
 
     postings_list_tuple = []
     for e in postings_list:
-        e_list = e.split('-')
-        tf = len(e_list) - 1
+        # e_list = e.split('-')
+        # tf = len(e_list) - 1
         # if boolean retrieval is called with phrase, then add positional indexing at the end
-        postings_list_tuple.append((int(e_list[0]), tf))
+        postings_list_tuple.append((int(e[0]), e[1]))
 
     return postings_list_tuple
 
