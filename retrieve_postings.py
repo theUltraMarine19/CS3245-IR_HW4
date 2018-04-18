@@ -1,4 +1,26 @@
 import sys
+from nltk.corpus import wordnet
+
+
+def get_synonyms(term):
+    """
+    This method returns the synonyms of a given term
+    :param term: a single word
+    :return: all synonyms of the term
+    """
+    term_list = term.split()
+    if len(term_list) > 1:
+        print "ERROR: Passing more than one word to gen_synonyms"
+        return -1
+
+    # get synonyms
+    syns_word = wordnet.synsets(term)
+    synonyms = []
+    for syn in syns_word:
+        for l in syn.lemmas():
+            synonyms.append(l.name())
+
+    return synonyms
 
 
 def get_postings(term, dictionary, fp_postings):
@@ -17,6 +39,10 @@ def get_postings(term, dictionary, fp_postings):
             # TODO: if we don't have enough docIDs in postings for a given term, check more synonyms
             # if not in dict 1, call synonyms and check for each of the top synonym if in dict 1
             # else get postings for term from dictionary 1 from postings.txt
+
+            synonyms_word1 = get_synonyms(term[0])
+            synonyms_word2 = get_synonyms(term[1])
+
             fp_postings.seek(dictionary[term[0]]['H'])
             postings_string = fp_postings.read(dictionary[term[0]]['T'] - dictionary[term[0]]['H'])
             postings_list = postings_string.split()
