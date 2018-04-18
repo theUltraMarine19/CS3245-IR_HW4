@@ -25,6 +25,64 @@ def get_synonyms(term):
     return synonyms
 
 
+def positional_intersect(l1, l2):
+    """
+    Create a list of all elements that are common for both lists.
+    :param l1: the first list that is part of the merge
+    :param l2: the second list that is part of the merge
+    :return: the result after applying the AND merge on the two lists
+    """
+    l1_len = len(l1.split(' '))
+    l2_len = len(l2.split(' '))
+    ans = []
+
+    if l1_len == 0 or l2_len == 0:
+        return ans
+    elif (l1_len == 1 and l1.split(' ')[0] == '') or (l2_len == 1 and l2.split(' ')[0] == ''):
+        return ans
+
+    p1 = p2 = 0
+    while p1 < l1_len and p2 < l2_len:
+        l1_doc_id = l1.split(' ')[p1].split('-')[0]
+        l2_doc_id = l2.split(' ')[p2].split('-')[0]
+
+        if l1_doc_id == l2_doc_id:
+
+            pos_ans = []
+            pp1 = pp2 = 0
+
+            pl1_len = len(l1.split(' ')[p1].split('-')[1:])
+            pl2_len = len(l2.split(' ')[p2].split('-')[1:])
+
+            while pp1 < pl1_len:
+                while pp2 < pl2_len:
+
+                    pos1 = l1.split(' ')[p1].split('-')[pp1 + 1]
+                    pos2 = l2.split(' ')[p2].split('-')[pp2 + 1]
+                    if (pos2 - pos1) == 1:
+                        pos_ans(pos2)
+                    elif pos2 > pos1:
+                        break
+                    pp2 += 1
+
+                while len(pos_ans) != 0 and (pos_ans[0] - pos1) != 1:
+                    pos_ans = pos_ans[1:]
+
+                for ps in pos_ans:
+                    ans.append((l1_doc_id, (pos1, ps)))
+
+                pp1 += 1
+
+            # ans.append(l1_doc_id)
+            p1 += 1
+            p2 += 1
+        elif l1_doc_id < l2_doc_id:
+            p1 += 1
+        else:
+            p2 += 1
+    return ans
+
+
 def get_postings(term, dictionary, fp_postings):
     """
     This method returns the postings for a specific term from either dict1, dict2 or positional indexing.
@@ -46,9 +104,6 @@ def get_postings(term, dictionary, fp_postings):
             # if not in dict 1, call synonyms and check for each of the top synonym if in dict 1
             # else get postings for term from dictionary 1 from postings.txt
 
-            synonyms_word1 = get_synonyms(term_list[0])
-            synonyms_word2 = get_synonyms(term_list[1])
-
             fp_postings.seek(dictionary[term_list[0]]['H'])
             postings_string = fp_postings.read(dictionary[term_list[0]]['T'] - dictionary[term_list[0]]['H'])
             postings_list = postings_string.split()
@@ -66,6 +121,9 @@ def get_postings(term, dictionary, fp_postings):
                 # if not in dict 2, call synonyms and check for each of the top synonym if in dict 2
                 # else get postings for term from dictionary 2 from postings.txt
                 # TODO: change to positional indexing
+                synonyms_word1 = get_synonyms(term_list[0])
+                synonyms_word2 = get_synonyms(term_list[1])
+
                 fp_postings.seek(dictionary[term[0]]['H'])
                 postings1_str = fp_postings.read(dictionary[term[0]]['T'] - dictionary[term[0]]['H'])
                 fp_postings.seek(dictionary[term[1]]['H'])
@@ -115,59 +173,4 @@ def get_postings(term, dictionary, fp_postings):
 
     return postings_list_tuple
 
-def positional_intersect(l1, l2):
-    """
-    Create a list of all elements that are common for both lists.
-    :param l1: the first list that is part of the merge
-    :param l2: the second list that is part of the merge
-    :return: the result after applying the AND merge on the two lists
-    """
-    l1_len = len(l1.split(' '))
-    l2_len = len(l2.split(' '))
-    ans = []
 
-    if l1_len == 0 or l2_len == 0:
-        return ans
-    elif (l1_len == 1 and l1.split(' ')[0] == '') or (l2_len == 1 and l2.split(' ')[0] == ''):
-        return ans
-
-    p1 = p2 = 0
-    while p1 < l1_len and p2 < l2_len:
-        l1_doc_id = l1.split(' ')[p1].split('-')[0]
-        l2_doc_id = l2.split(' ')[p2].split('-')[0]
-
-        if l1_doc_id == l2_doc_id:
-            
-            pos_ans = []
-            pp1 = pp2 = 0
-
-            pl1_len = len(l1.split(' ')[p1].split('-')[1:])
-            pl2_len = len(l2.split(' ')[p2].split('-')[1:])
-
-            while pp1 < pl1_len:
-                while pp2 < pl2_len:
-
-                    pos1 = l1.split(' ')[p1].split('-')[pp1+1]
-                    pos2 = l2.split(' ')[p2].split('-')[pp2+1] 
-                    if (pos2 - pos1) == 1:
-                        pos_ans(pos2)
-                    elif  pos2 > pos1:
-                        break
-                    pp2 += 1
-
-                while len(pos_ans) != 0 and (pos_ans[0] - pos1) != 1:
-                    pos_ans = pos_ans[1:]
-
-                for ps in pos_ans:
-                    ans.append((l1_doc_id, (pos1, ps)))
-
-                pp1 += 1
-
-            # ans.append(l1_doc_id)
-            p1 += 1
-            p2 += 1
-        elif l1_doc_id < l2_doc_id:
-            p1 += 1
-        else:
-            p2 += 1
-    return ans
