@@ -52,6 +52,9 @@ def get_postings(term, dictionary, fp_postings):
             fp_postings.seek(dictionary[term_list[0]]['H'])
             postings_string = fp_postings.read(dictionary[term_list[0]]['T'] - dictionary[term_list[0]]['H'])
             postings_list = postings_string.split()
+            postings_list = [doc_id_position_string.split("-") for doc_id_position_string in postings_list]
+            postings_list = [(doc_id_position_list[0], len(doc_id_position_list) - 1) for doc_id_position_list in
+                             postings_list]
 
     elif len(term_list) == 2:
         # for terms of length 2, use the format of double indexing in dict'
@@ -86,8 +89,8 @@ def get_postings(term, dictionary, fp_postings):
                     postings2_string = fp_postings.read(dictionary[term[1]]['T'] - dictionary[term[1]]['H'])
                     fp_postings.seek(dictionary[term[1]]['H'])
                     postings3_string = fp_postings.read(dictionary[term[2]]['T'] - dictionary[term[2]]['H'])
-                    postings12_list = positional_intersect(postings1_str, postings2_str)
-                    postings23_list = positional_intersect(postings2_str, postings3_str)
+                    postings12_list = positional_intersect(postings1_string, postings2_string)
+                    postings23_list = positional_intersect(postings2_string, postings3_string)
                     final_postings = []
                     for tup1 in postings12_list:
                         for tup2 in postings23_list:

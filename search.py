@@ -10,6 +10,8 @@ from nltk.stem.porter import PorterStemmer
 import boolean_retrieval as br
 import freetext_retrieval as fr
 
+# params:
+# -d posdict.txt -p pospostings.txt -q queries.txt -o output.txt
 
 '''
 ======================

@@ -17,17 +17,16 @@ sys.setdefaultencoding('ISO-8859-1')
 # TODO think about the benefits of stemming
 # TODO check if all the memory is able to store all dictionaries before we write them out
 
-ngram_dictionary = {}
-ngram_dictionary_count_dict = {}
 positional_dict = {}
 positional_count_dict = {}
 meta_dict = {"title":{}, "date_posted":{}, "court":{}}
 meta_count_dict = {"title":{}, "date_posted":{}, "court":{}}
+stemmer_dict = {}
 
 all_doc_ids = []
 ps = PorterStemmer()
 
-doc_words1 = dict()
+doc_words = {}
 
 # the size of the training data set
 collection_size = 0
@@ -35,20 +34,20 @@ collection_size = 0
 csv.field_size_limit(sys.maxsize)
 
 # params:
-# -i dataset.csv -d dict.txt --dp postings.txt -p posdict.txt --pp pospostings.txt -m metadict.txt --mp metapostings.txt
-# -i output/ -d dict.txt --dp postings.txt -p posdict.txt --pp pospostings.txt -m metadict.txt --mp metapostings.txt
+# -i dataset.csv -d posdict.txt -p pospostings.txt
+# -i output/ -d posdict.txt -p pospostings.txt
+
+output_meta_dict = "metadict.txt"
+output_meta_postings = "metapostings.txt"
 
 def usage():
-    print "usage: " + sys.argv[0] + " -i dataset_file -d ngram-dictionary-file --dp ngram-postings-file "\
-                                    "-p postional-dictionary-file --pp positional-postings-file" \
-                                    "-m metadata-dictionary-file --mp metadata-postings-file"
+    print "usage: " + sys.argv[0] + " -i dataset_file -d postional-dictionary-file -p positional-postings-file"
 
 
-dataset_file = output_ngram_dict = output_ngram_postings = \
-    output_pos_dict = output_pos_postings = output_meta_dict = output_meta_postings = None
+dataset_file = output_pos_dict = output_pos_postings = None
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], 'i:d:p:m:', ["dp=", "pp=", "mp="])
+    opts, args = getopt.getopt(sys.argv[1:], 'i:d:p:')
 except getopt.GetoptError, err:
     usage()
     sys.exit(2)
@@ -56,23 +55,14 @@ except getopt.GetoptError, err:
 for o, a in opts:
     if o == '-i':  # dataset directory
         dataset_file = a
-    elif o == '-d':  # unigram dictionary file
-        output_ngram_dict = a
-    elif o == '--dp':  # unigram postings file
-        output_ngram_postings = a
-    elif o == '-p':  # positional dictionary file
+    elif o == '-d':  # positional dictionary file
         output_pos_dict = a
-    elif o == '--pp':  # positional postings file
+    elif o == '-p':  # positional postings file
         output_pos_postings = a
-    elif o == '-m':  # metadata dictionary file
-        output_meta_dict = a
-    elif o == '--mp':  # metadata postings file
-        output_meta_postings = a
     else:
         assert False, "unhandled option"
 
-if dataset_file is None or output_ngram_dict is None or output_ngram_postings is None \
-        or output_pos_dict is None or output_pos_postings is None or output_meta_dict is None or output_meta_postings is None:
+if dataset_file is None or output_pos_dict is None or output_pos_postings is None:
     usage()
     sys.exit(2)
 
@@ -84,25 +74,24 @@ def read_data_files_test(input_dir):
     :return: None
     """
     global collection_size
-    all_docs = os.listdir(input_dir)
-
-    for doc in all_docs:
-        with open(doc, 'rb') as csv_file:
-            data_reader = csv.reader(csv_file, delimiter=',', )
-            for index, row in enumerate(data_reader):
-                if index == 0:
-                    continue
-                if index >= 2:
-                    break
-                doc_id = row[0]
-                title = row[1]
-                content = row[2]
-                date_posted = row[3]
-                court = row[4]
-                build_ngram_dict(doc_id, content)
-                build_positional_index_dict(doc_id, content)
-                build_meta_dict(doc_id, title, content, date_posted, court)
-                collection_size += 1
+    count = 0
+    with open(input_dir, 'rb') as csv_file:
+        data_reader = csv.reader(csv_file, delimiter=',', )
+        for index, row in enumerate(data_reader):
+            if index == 0:
+                continue
+            if index >= 2:
+                break
+            doc_id = row[0]
+            print count
+            count = count + 1
+            title = row[1]
+            content = row[2]
+            date_posted = row[3]
+            court = row[4]
+            build_positional_index_dict(doc_id, content)
+            build_meta_dict(doc_id, title, content, date_posted, court)
+            collection_size += 1
 
 
 def read_data_files(input_dir):
@@ -112,62 +101,22 @@ def read_data_files(input_dir):
     :return: None
     """
     global collection_size
-    allDocs = os.listdir(input_dir)
-    os.chdir(input_dir)
-    allDocsSorted = sorted(allDocs, key = lambda x : int(x.split('_')[1].split('.')[0]))
-    for doc in allDocsSorted:
-        print doc
-    
-
-        with open(doc, 'rb') as csv_file:
-            data_reader = csv.reader(csv_file, delimiter=',', )
-            for index, row in enumerate(data_reader):
-                if index == 0:
-                    continue
-                doc_id = int(row[0])
-                title = row[1]
-                content = row[2]
-                date_posted = row[3]
-                court = row[4]
-                build_positional_index_dict(doc_id, content)
-                build_meta_dict(doc_id, title, content, date_posted, court)
-                collection_size += 1
-
-    os.chdir(r'..')
-
-def build_ngram_dict(doc_id, doc_string):
-    """
-    Build a mixed dictionary with a pair of terms as keys and list of distinct doc IDs as values.
-    :param doc_id: a document ID from the data set
-    :param doc_string: the text of document corresponding to the given doc_id
-    :return: None
-    """
-    sentences = sent_tokenize(doc_string)
-    for sent in sentences:
-        words = word_tokenize(sent)
-        for i in range(len(words)):
-            word1 = words[i]
-            term1 = re.sub(r'[^a-zA-Z0-9]', '', str(word1))
-            term1 = ps.stem(term1.lower())
-
-            if len(term1) != 0:
-                if term1 in ngram_dictionary:
-                    if doc_id in ngram_dictionary[term1]:
-                        ngram_dictionary[term1][doc_id] += 1
-                    else:
-                        ngram_dictionary[term1][doc_id] = 1
-                else:
-                    ngram_dictionary[term1] = {}
-                    ngram_dictionary[term1][doc_id] = 1
-
-                # build the length add-on to the free text retrieval
-                if doc_id in doc_words1:
-                    if term1 in doc_words1[doc_id]:
-                        doc_words1[doc_id][term1] += 1
-                    else:
-                        doc_words1[doc_id][term1] = 1
-                else:
-                    doc_words1[doc_id] = {term1: 1}
+    count = 0
+    with open(input_dir, 'rb') as csv_file:
+        data_reader = csv.reader(csv_file, delimiter=',', )
+        for index, row in enumerate(data_reader):
+            if index == 0:
+                continue
+            doc_id = row[0]
+            print count
+            count = count + 1
+            title = row[1]
+            content = row[2]
+            date_posted = row[3]
+            court = row[4]
+            build_positional_index_dict(doc_id, content)
+            build_meta_dict(doc_id, title, content, date_posted, court)
+            collection_size += 1
 
 
 def build_positional_index_dict(doc_id, doc_string):
@@ -178,13 +127,25 @@ def build_positional_index_dict(doc_id, doc_string):
     :param doc_string: the text of document corresponding to the given doc_id
     :return: None
     """
+    global stemmer_dict
+
     count = 1
     sentences = sent_tokenize(doc_string)
+
     for sent in sentences:
         words = word_tokenize(sent)
         for word in words:
             term = re.sub(r'[^a-zA-Z0-9]', '', str(word))
-            term = ps.stem(term.lower())
+            term = term.lower()
+
+            cache = stemmer_dict.get(term, None)
+            if cache is not None:
+                term = cache
+            else:
+                stem_res = ps.stem(term)
+                stemmer_dict[term] = stem_res
+                term = stem_res
+
             if len(term) != 0:
                 if term in positional_dict:
                     if doc_id not in positional_dict[term]:
@@ -195,6 +156,14 @@ def build_positional_index_dict(doc_id, doc_string):
                     positional_dict[term] = {}
                     positional_dict[term][doc_id] = [count]
             count += 1
+
+            if doc_id in doc_words:
+                if term in doc_words[doc_id]:
+                    doc_words[doc_id][term] += 1
+                else:
+                    doc_words[doc_id][term] = 1
+            else:
+                doc_words[doc_id] = {term : 1}
 
 
 def build_meta_dict(doc_id, title, content, date_posted, court):
@@ -221,60 +190,6 @@ def build_positional_index_count_dict(positional_count_dict ,term='', head=0, ta
     positional_count_dict[term] = {'H': head, 'T': tail, 'F': freq}
 
 
-def build_unigram_dictionary_count_dict(ngram_dictionary_count_dict, term1='', head=0, tail=0, freq=0):
-    """
-    Build the dictionary with term as keys and the frequency count, head and tail byte location as values.
-    :param ngram_count_dict:
-    :type term: the term to be added to the dictionary
-    :param head:
-    :param tail:
-    :param freq:
-    :return: None
-    """
-    if term1 in ngram_dictionary_count_dict:
-        ngram_dictionary_count_dict[term1]['H'] = head
-        ngram_dictionary_count_dict[term1]['T'] = tail
-        ngram_dictionary_count_dict[term1]['F'] = freq
-    else:
-        ngram_dictionary_count_dict[term1] = {'H': head, 'T': tail, 'F': freq}
-
-def build_bigram_dictionary_count_dict(ngram_dictionary_count_dict, term1='', term2 ='', head=0, tail=0, freq=0):
-    """
-    Build the dictionary with term as keys and the frequency count, head and tail byte location as values.
-    :param ngram_count_dict:
-    :type term: the term to be added to the dictionary
-    :param head:
-    :param tail:
-    :param freq:
-    :return: None
-    """
-    if term1 not in ngram_dictionary_count_dict:
-        ngram_dictionary_count_dict[term1] = {}
-
-    if term2 in ngram_dictionary_count_dict[term1]:
-        ngram_dictionary_count_dict[term1][term2]['H'] = head
-        ngram_dictionary_count_dict[term1][term2]['T'] = tail
-        ngram_dictionary_count_dict[term1][term2]['F'] = freq
-    else:
-        ngram_dictionary_count_dict[term1][term2] = {'H': head, 'T': tail, 'F': freq}
-
-def build_trigram_dictionary_count_dict(ngram_dictionary_count_dict, term1='', term2 ='', term3 = '',head=0, tail=0, freq=0):
-    """
-    Build the dictionary with term as keys and the frequency count, head and tail byte location as values.
-    :param ngram_count_dict:
-    :type term: the term to be added to the dictionary
-    :param head:
-    :param tail:
-    :param freq:
-    :return: None
-    """
-    if term1 not in ngram_dictionary_count_dict:
-        ngram_dictionary_count_dict[term1] = {}
-    if term2 not in ngram_dictionary_count_dict[term1]:
-        ngram_dictionary_count_dict[term1][term2] = {}
-    ngram_dictionary_count_dict[term1][term2][term3] = {'H': head, 'T': tail, 'F': freq}
-
-
 
 def build_meta_count_dict(category='', term='', head=0, tail=0, freq=0):
     """
@@ -290,47 +205,6 @@ def build_meta_count_dict(category='', term='', head=0, tail=0, freq=0):
 
 
 
-def write_ngram_dict_output(ngram_dict, ngram_count_dict, output_file_dictionary, output_file_postings):
-    """
-    Write the term count dictionary and the postings file to 2 distinct txt files.
-    :param ngram_dict:
-    :param ngram_count_dict:
-    :param output_file_dictionary:
-    :param output_file_postings:
-    :return: None
-    """
-    with open(output_file_postings, 'w') as out_postings:
-        # term_dict has term as key, doc_id_dict as value
-        # doc_id_dict has doc id as key, term frequency corresponding to the doc id as value
-        doc_norm1 = {}
-
-        for term1, doc_id_dict1 in ngram_dict.iteritems():
-            unigram_posting = []
-
-            for term_or_doc_id1, dict_or_tf1 in doc_id_dict1.iteritems():
-                # handle unigram
-                if term_or_doc_id1 not in doc_norm1:
-                    values1 = [1 + math.log(i, 10) for i in doc_words1[term_or_doc_id1].values()]
-                    norm_val1 = math.sqrt(sum(i ** 2 for i in values1))
-                    doc_norm1[term_or_doc_id1] = norm_val1
-                unigram_posting.append(str(term_or_doc_id1) + '-' + str(dict_or_tf1))
-            
-            posting_str1 = " ".join(str(e) for e in unigram_posting) + " "
-
-            head1 = out_postings.tell()
-            out_postings.write(posting_str1)
-            freq1 = len(unigram_posting)
-            tail1 = out_postings.tell()
-            build_unigram_dictionary_count_dict(ngram_count_dict, term1, head1, tail1, freq1)
-
-    with open(output_file_dictionary, 'w') as out_dict:
-        all_doc_ids.sort()
-        ngram_count_dict['N'] = collection_size
-        ngram_count_dict['DOC_NORM'] = doc_norm1
-        json.dump(ngram_count_dict, out_dict)
-
-
-
 def write_positional_output(positional_dict, positional_count_dict, output_file_dictionary, output_file_postings):
     """
     Write the positional index to output files.
@@ -340,6 +214,8 @@ def write_positional_output(positional_dict, positional_count_dict, output_file_
     :param output_file_postings:
     :return: None
     """
+    doc_norm = {}
+
     with open(output_file_postings, 'w') as out_postings:
         for term, doc_id_dict in positional_dict.iteritems():
             doc_id_list = doc_id_dict.keys()
@@ -350,16 +226,19 @@ def write_positional_output(positional_dict, positional_count_dict, output_file_
                 out_str = str(doc_id) + '-'
                 pos_list = doc_id_dict[doc_id]
                 pos_list.sort()
-                tf = len(pos_list)
-                out_str += str(tf) + '-'
                 hold = 0
                 for pos_val in pos_list:
                     if hold == 0:
                         out_str += str(pos_val)
                         hold = 1
                     else:
-                        out_str += ',' + str(pos_val)
+                        out_str += '-' + str(pos_val)
                 posting.append(out_str)
+
+                if doc_id not in doc_norm:
+                    values = [1 + math.log(i, 10) for i in doc_words[doc_id].values()]
+                    norm_val = math.sqrt(sum(i ** 2 for i in values))
+                    doc_norm[doc_id] = norm_val
 
             posting_str = " ".join(str(e) for e in posting) + " "
 
@@ -371,6 +250,8 @@ def write_positional_output(positional_dict, positional_count_dict, output_file_
             build_positional_index_count_dict(positional_count_dict, term, head, tail, freq)
 
     with open(output_file_dictionary, 'w') as out_dict:
+        positional_count_dict['DOC_NORM'] = doc_norm
+        positional_count_dict['N'] = collection_size
         json.dump(positional_count_dict, out_dict)
 
 
@@ -393,6 +274,5 @@ def write_meta_output(meta_dict, meta_count_dict, output_file_dictionary, output
 
 if __name__ == "__main__":
     read_data_files(dataset_file)
-    write_ngram_dict_output(ngram_dictionary, ngram_dictionary_count_dict, output_ngram_dict, output_ngram_postings)
     write_positional_output(positional_dict, positional_count_dict, output_pos_dict, output_pos_postings)
     write_meta_output(meta_dict, meta_count_dict, output_meta_dict, output_meta_postings)
