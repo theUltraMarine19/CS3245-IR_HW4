@@ -1,1 +1,0 @@
-{"court": {"Federal Court of Australia": {"H": 0, "T": 8, "F": 1}}, "date_posted": {"1988-12-21 00:00:00": {"H": 8, "T": 16, "F": 1}}, "title": {"Lollback v. The Queen [1988] FCA 769": {"H": 16, "T": 24, "F": 1}}}

@@ -1,1 +1,0 @@
-{"court": {"High Court of Australia": {"H": 0, "T": 8, "F": 1}}, "date_posted": {"1998-01-20 00:00:00": {"H": 8, "T": 16, "F": 1}}, "title": {"R v Swaffield [1998] HCA 1": {"H": 16, "T": 24, "F": 1}}}

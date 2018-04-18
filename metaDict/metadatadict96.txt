@@ -1,1 +1,0 @@
-{"court": {"NSW Court of Criminal Appeal": {"H": 0, "T": 8, "F": 1}}, "date_posted": {"2005-11-17 00:00:00": {"H": 8, "T": 16, "F": 1}}, "title": {"Regina v Khalouf [2005] NSWCCA 395": {"H": 16, "T": 24, "F": 1}}}

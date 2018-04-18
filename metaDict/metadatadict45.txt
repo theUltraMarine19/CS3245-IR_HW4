@@ -1,1 +1,0 @@
-{"court": {"CA Supreme Court": {"H": 0, "T": 8, "F": 1}}, "date_posted": {"2016-03-24 00:00:00": {"H": 8, "T": 16, "F": 1}}, "title": {"R. v. Borowiec [2016] 1 SCR 80; 2016 SCC 11": {"H": 16, "T": 24, "F": 1}}}

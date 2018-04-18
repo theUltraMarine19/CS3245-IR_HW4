@@ -1,1 +1,0 @@
-{"court": {"NSW Court of Criminal Appeal": {"H": 0, "T": 8, "F": 1}}, "date_posted": {"2013-02-14 00:00:00": {"H": 8, "T": 16, "F": 1}}, "title": {"Karim v R; Magaming v R; Bin Lahaiya v R; Bayu v R; Alomalu v R [2013] NSWCCA 23": {"H": 16, "T": 24, "F": 1}}}

@@ -1,1 +1,0 @@
-{"court": {"NSW Court of Criminal Appeal": {"H": 0, "T": 8, "F": 1}}, "date_posted": {"2016-03-20 00:00:00": {"H": 8, "T": 16, "F": 1}}, "title": {"Proud v R (No 2) [2016] NSWCCA 44": {"H": 16, "T": 24, "F": 1}}}

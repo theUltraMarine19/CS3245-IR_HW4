@@ -1,1 +1,0 @@
-{"court": {"NSW Court of Criminal Appeal": {"H": 0, "T": 8, "F": 1}}, "date_posted": {"2015-03-24 00:00:00": {"H": 8, "T": 16, "F": 1}}, "title": {"Sabra v Regina [2015] NSWCCA 38": {"H": 16, "T": 24, "F": 1}}}

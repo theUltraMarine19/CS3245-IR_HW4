@@ -1,1 +1,0 @@
-{"court": {"NSW Supreme Court": {"H": 0, "T": 8, "F": 1}}, "date_posted": {"2017-11-22 00:00:00": {"H": 8, "T": 16, "F": 1}}, "title": {"R v SP [2017] NSWSC 1579": {"H": 16, "T": 24, "F": 1}}}
