@@ -81,6 +81,11 @@ def main():
                 res = fr.freetext_retrieve(terms, term_dictionary, fp_postings)
                 print res
 
+    with open(file_of_output, 'w') as out:
+        out_str = str()
+        out_str += ' '.join(str(el) for el in res) + '\n'
+        out.write(out_str[:-1])  # removes the last '\n'
+
 
 if __name__ == "__main__":
     main()
