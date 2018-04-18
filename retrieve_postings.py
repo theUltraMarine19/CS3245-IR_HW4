@@ -18,7 +18,9 @@ def get_synonyms(term):
     synonyms = []
     for syn in syns_word:
         for l in syn.lemmas():
-            synonyms.append(l.name())
+            # TODO: Check if that's fine
+            if l.name() not in synonyms:
+                synonyms.append(l.name())
 
     return synonyms
 
@@ -31,49 +33,53 @@ def get_postings(term, dictionary, fp_postings):
     :param fp_postings:
     :return: postings for the given term
     """
+    if type(term) != list:
+        term_list = term.split()
+    else:
+        term_list = term
     # TODO: term is still a string make sure it's a list or check for word count
-    if len(term) == 1:
+    if len(term_list) == 1:
         # check if its a single word
         # check if term in dictionary 1
-        if term[0] in dictionary:
+        if term_list[0] in dictionary:
             # TODO: if we don't have enough docIDs in postings for a given term, check more synonyms
             # if not in dict 1, call synonyms and check for each of the top synonym if in dict 1
             # else get postings for term from dictionary 1 from postings.txt
 
-            synonyms_word1 = get_synonyms(term[0])
-            synonyms_word2 = get_synonyms(term[1])
+            synonyms_word1 = get_synonyms(term_list[0])
+            synonyms_word2 = get_synonyms(term_list[1])
 
-            fp_postings.seek(dictionary[term[0]]['H'])
-            postings_string = fp_postings.read(dictionary[term[0]]['T'] - dictionary[term[0]]['H'])
+            fp_postings.seek(dictionary[term_list[0]]['H'])
+            postings_string = fp_postings.read(dictionary[term_list[0]]['T'] - dictionary[term_list[0]]['H'])
             postings_list = postings_string.split()
 
-    elif len(term) == 2:
+    elif len(term_list) == 2:
         # for terms of length 2, use the format of double indexing in dict'
         # check if term in dictionary 2
-        if term[0] in dictionary:
-            if term[1] in dictionary:
+        if term_list[0] in dictionary:
+            if term_list[1] in dictionary:
                 # TODO: if we don't have enough docIDs in postings for a given term, check more synonyms
                 # TODO: since length 2, fist check synonyms for the first word, if not enough docIDs, check synonyms for 2. word
                 # if not in dict 2, call synonyms and check for each of the top synonym if in dict 2
                 # else get postings for term from dictionary 2 from postings.txt
                 # TODO: change to positional indexing
-                fp_postings.seek(dictionary[term[0]][term[1]]['H'])
+                fp_postings.seek(dictionary[term_list[0]][term_list[1]]['H'])
                 postings_string = fp_postings.read(
-                    dictionary[term[0]][term[1]]['T'] - dictionary[term[0]][term[1]]['H'])
+                    dictionary[term_list[0]][term_list[1]]['T'] - dictionary[term_list[0]][term_list[1]]['H'])
                 postings_list = postings_string.split()
 
-    elif len(term) == 3:
-        if term[0] in dictionary:
-            if term[1] in dictionary[term[0]]:
-                if term[2] in dictionary[term[0]][term[1]]:
+    elif len(term_list) == 3:
+        if term_list[0] in dictionary:
+            if term_list[1] in dictionary[term_list[0]]:
+                if term_list[2] in dictionary[term_list[0]][term_list[1]]:
                     # TODO: if we don't have enough docIDs in postings for a given term, check more synonyms
                     # TODO: since length 3, fist check synonyms for the first word, if not enough docIDs, check synonyms for 2. word etc.
                     # if not in dict 2, call synonyms and check for each of the top synonym if in dict 2
                     # else get postings for term from dictionary 2 from postings.txt
                     # TODO: change to positional indexing
-                    fp_postings.seek(dictionary[term[0]][term[1]][term[2]]['H'])
+                    fp_postings.seek(dictionary[term_list[0]][term_list[1]][term_list[2]]['H'])
                     postings_string = fp_postings.read(
-                        dictionary[term[0]][term[1]][term[2]]['T'] - dictionary[term[0]][term[1]][term[2]]['H'])
+                        dictionary[term_list[0]][term_list[1]][term_list[2]]['T'] - dictionary[term_list[0]][term_list[1]][term_list[2]]['H'])
                     postings_list = postings_string.split()
                     # OR second approach:
                     # complicated

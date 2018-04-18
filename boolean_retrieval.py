@@ -27,13 +27,12 @@ def merge_lists(l1, l2):
     return ans
 
 
-# TODO: Can we have boolean retrieval and free text in one query
-
-def order_by_size(term_list, dictionary):
+def order_by_size(term_list, dictionary, fp_postings):
     """
     Evaluates the size of the posting list of a given expression (if existing in the term dictionary).
     :param term_list:
     :param dictionary:
+    :param fp_postings:
     :return: 0 - if not in the term dictionary
              document frequency of the term - if the term is present in the dictionary
     """
@@ -45,34 +44,13 @@ def order_by_size(term_list, dictionary):
         expr_words = term.split()
         if len(expr_words) == 1:
             if term not in dictionary:
-                # TODO: check for synonyms
-                return 0
-            res = dictionary[term]['f']
-        elif len(expr_words) == 2:
-            word1 = expr_words[0]
-            word2 = expr_words[1]
-            if word1 not in dictionary:
-                # TODO: check for synonyms
-                synonym = word1
-                res = dictionary[synonym]['f']
-                #return 0
+                res_list = get_postings(term, dictionary, fp_postings)
+                res = len(res_list)
             else:
-                # TODO: use positional indexing + check for synonyms
-                res = dictionary[word1]['f']
-                #return 0
-        elif len(expr_words) == 3:
-            word1 = expr_words[0]
-            word2 = expr_words[1]
-            word3 = expr_words[2]
-            if word1 not in dictionary:
-                # TODO: check for synonyms
-                synonym = word1
-                res = dictionary[synonym]['f']
-                #return 0
-            else:
-                # TODO: use positional indexing + check for synonyms
-                res = dictionary[word1]['f']
-                #return 0
+                res = dictionary[term]['f']
+        elif len(expr_words) == 2 or len(expr_words) == 3:
+            res_list = get_postings(expr_words, dictionary, fp_postings)
+            res = len(res_list)
         else:
             print "Incorrect input"
             return 0
@@ -87,7 +65,6 @@ def order_by_size(term_list, dictionary):
         res_list[0] = tmp
     return res_list
 
-# TODO: define get_synonyms as a new file or as a method
 
 def bool_retrieve(query, dictionary, fp_postings):
     """
