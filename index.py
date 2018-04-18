@@ -26,7 +26,7 @@ stemmer_dict = {}
 all_doc_ids = []
 ps = PorterStemmer()
 
-doc_words1 = dict()
+doc_words = {}
 
 # the size of the training data set
 collection_size = 0
@@ -74,6 +74,7 @@ def read_data_files_test(input_dir):
     :return: None
     """
     global collection_size
+    count = 0
     with open(input_dir, 'rb') as csv_file:
         data_reader = csv.reader(csv_file, delimiter=',', )
         for index, row in enumerate(data_reader):
@@ -82,6 +83,8 @@ def read_data_files_test(input_dir):
             if index >= 2:
                 break
             doc_id = row[0]
+            print count
+            count = count + 1
             title = row[1]
             content = row[2]
             date_posted = row[3]
@@ -98,12 +101,15 @@ def read_data_files(input_dir):
     :return: None
     """
     global collection_size
+    count = 0
     with open(input_dir, 'rb') as csv_file:
         data_reader = csv.reader(csv_file, delimiter=',', )
         for index, row in enumerate(data_reader):
             if index == 0:
                 continue
             doc_id = row[0]
+            print count
+            count = count + 1
             title = row[1]
             content = row[2]
             date_posted = row[3]
@@ -137,8 +143,8 @@ def build_positional_index_dict(doc_id, doc_string):
                 term = cache
             else:
                 stem_res = ps.stem(term)
-                term = stem_res
                 stemmer_dict[term] = stem_res
+                term = stem_res
 
             if len(term) != 0:
                 if term in positional_dict:
@@ -150,6 +156,14 @@ def build_positional_index_dict(doc_id, doc_string):
                     positional_dict[term] = {}
                     positional_dict[term][doc_id] = [count]
             count += 1
+
+            if doc_id in doc_words:
+                if term in doc_words[doc_id]:
+                    doc_words[doc_id][term] += 1
+                else:
+                    doc_words[doc_id][term] = 1
+            else:
+                doc_words[doc_id] = {term : 1}
 
 
 def build_meta_dict(doc_id, title, content, date_posted, court):
@@ -200,6 +214,8 @@ def write_positional_output(positional_dict, positional_count_dict, output_file_
     :param output_file_postings:
     :return: None
     """
+    doc_norm = {}
+
     with open(output_file_postings, 'w') as out_postings:
         for term, doc_id_dict in positional_dict.iteritems():
             doc_id_list = doc_id_dict.keys()
@@ -210,8 +226,6 @@ def write_positional_output(positional_dict, positional_count_dict, output_file_
                 out_str = str(doc_id) + '-'
                 pos_list = doc_id_dict[doc_id]
                 pos_list.sort()
-                # tf = len(pos_list)
-                # out_str += str(tf) + '-'
                 hold = 0
                 for pos_val in pos_list:
                     if hold == 0:
@@ -220,6 +234,11 @@ def write_positional_output(positional_dict, positional_count_dict, output_file_
                     else:
                         out_str += '-' + str(pos_val)
                 posting.append(out_str)
+
+                if doc_id not in doc_norm:
+                    values = [1 + math.log(i, 10) for i in doc_words[doc_id].values()]
+                    norm_val = math.sqrt(sum(i ** 2 for i in values))
+                    doc_norm1[doc_id] = norm_val
 
             posting_str = " ".join(str(e) for e in posting) + " "
 
@@ -231,6 +250,8 @@ def write_positional_output(positional_dict, positional_count_dict, output_file_
             build_positional_index_count_dict(positional_count_dict, term, head, tail, freq)
 
     with open(output_file_dictionary, 'w') as out_dict:
+        positional_count_dict['DOC_NORM'] = doc_norm
+        positional_count_dict['N'] = collection_size
         json.dump(positional_count_dict, out_dict)
 
 
