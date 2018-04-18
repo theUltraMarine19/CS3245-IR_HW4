@@ -69,7 +69,7 @@ def main():
                 print "bool " + res
             else:
                 # call freetext retrieval -> e.g freetextRetriev(query.split(' '))
-                separate_terms = re.findall(r'(?P<q_marks>\"(.*?)\")|(?P<s_word>\w+)', query)
+                separate_terms = re.findall(r'(?P<q_marks>\"(.*?)\")|(?P<s_word>\w+)', q)
                 terms = []
                 for b, q, s in separate_terms:
                     if b:

@@ -110,6 +110,7 @@ def get_postings(term, dictionary, fp_postings):
             postings_list = [doc_id_position_string.split("-") for doc_id_position_string in postings_list]
             postings_list = [(doc_id_position_list[0], len(doc_id_position_list) - 1) for doc_id_position_list in
                              postings_list]
+            return postings_list
 
     elif len(term_list) == 2:
         # for terms of length 2, use the format of double indexing in dict'
