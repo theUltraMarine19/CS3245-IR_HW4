@@ -1,16 +1,4 @@
 .idea/
-unidict.txt
-unipostings.txt
-bidict.txt
-bipostings.txt
-tridict.txt
-tripostings.txt
-metadict.txt
-metapostings.txt
-posdict.txt
-pospostings.txt
-dataset/
-index.sh
 dict.json
 *.pyc
 dataset.csv
