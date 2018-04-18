@@ -112,13 +112,13 @@ def read_data_files(input_dir):
     :return: None
     """
     global collection_size
-    all_docs = os.listdir(input_dir)
-
+    allDocs = os.listdir(input_dir)
     os.chdir(input_dir)
-    i=0
-    for doc in all_docs:
-        i+=1
-        print i
+    allDocsSorted = sorted(allDocs, key = lambda x : int(x.split('_')[1].split('.')[0]))
+    for doc in allDocsSorted:
+        print doc
+    
+
         with open(doc, 'rb') as csv_file:
             data_reader = csv.reader(csv_file, delimiter=',', )
             for index, row in enumerate(data_reader):
@@ -129,10 +129,10 @@ def read_data_files(input_dir):
                 content = row[2]
                 date_posted = row[3]
                 court = row[4]
-                build_ngram_dict(doc_id, content)
                 build_positional_index_dict(doc_id, content)
                 build_meta_dict(doc_id, title, content, date_posted, court)
                 collection_size += 1
+
     os.chdir(r'..')
 
 def build_ngram_dict(doc_id, doc_string):
