@@ -21,6 +21,7 @@ positional_dict = {}
 positional_count_dict = {}
 meta_dict = {"title":{}, "date_posted":{}, "court":{}}
 meta_count_dict = {"title":{}, "date_posted":{}, "court":{}}
+stemmer_dict = {}
 
 all_doc_ids = []
 ps = PorterStemmer()
@@ -33,20 +34,20 @@ collection_size = 0
 csv.field_size_limit(sys.maxsize)
 
 # params:
-# -i dataset.csv -d dict.txt --dp postings.txt -p posdict.txt --pp pospostings.txt -m metadict.txt --mp metapostings.txt
-# -i output/ -d dict.txt --dp postings.txt -p posdict.txt --pp pospostings.txt -m metadict.txt --mp metapostings.txt
+# -i dataset.csv -d posdict.txt -p pospostings.txt
+# -i output/ -d posdict.txt -p pospostings.txt
+
+output_meta_dict = "metadict.txt"
+output_meta_postings = "metapostings.txt"
 
 def usage():
-    print "usage: " + sys.argv[0] + " -i dataset_file "\
-                                    "-p postional-dictionary-file --pp positional-postings-file" \
-                                    "-m metadata-dictionary-file --mp metadata-postings-file"
+    print "usage: " + sys.argv[0] + " -i dataset_file -d postional-dictionary-file -p positional-postings-file" 
 
 
-dataset_file = \
-    output_pos_dict = output_pos_postings = output_meta_dict = output_meta_postings = None
+dataset_file = output_pos_dict = output_pos_postings = None
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], 'i:p:m:', ["pp=", "mp="])
+    opts, args = getopt.getopt(sys.argv[1:], 'i:d:p:')
 except getopt.GetoptError, err:
     usage()
     sys.exit(2)
@@ -54,19 +55,14 @@ except getopt.GetoptError, err:
 for o, a in opts:
     if o == '-i':  # dataset directory
         dataset_file = a
-    elif o == '-p':  # positional dictionary file
+    elif o == '-d':  # positional dictionary file
         output_pos_dict = a
-    elif o == '--pp':  # positional postings file
+    elif o == '-p':  # positional postings file
         output_pos_postings = a
-    elif o == '-m':  # metadata dictionary file
-        output_meta_dict = a
-    elif o == '--mp':  # metadata postings file
-        output_meta_postings = a
     else:
         assert False, "unhandled option"
 
-if dataset_file is None \
-        or output_pos_dict is None or output_pos_postings is None or output_meta_dict is None or output_meta_postings is None:
+if dataset_file is None or output_pos_dict is None or output_pos_postings is None:
     usage()
     sys.exit(2)
 
@@ -136,13 +132,25 @@ def build_positional_index_dict(doc_id, doc_string):
     :param doc_string: the text of document corresponding to the given doc_id
     :return: None
     """
+    global stemmer_dict
+
     count = 1
     sentences = sent_tokenize(doc_string)
+
     for sent in sentences:
         words = word_tokenize(sent)
         for word in words:
             term = re.sub(r'[^a-zA-Z0-9]', '', str(word))
-            term = ps.stem(term.lower())
+            term = term.lower()
+
+            cache = stemmer_dict.get(term, None)
+            if cache is not None:
+                term = cache
+            else:
+                stem_res = ps.stem(term)
+                term = stem_res
+                stemmer_dict[term] = stem_res
+
             if len(term) != 0:
                 if term in positional_dict:
                     if doc_id not in positional_dict[term]:
