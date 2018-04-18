@@ -55,16 +55,15 @@ if dictionary_file is None or postings_file is None or file_of_queries is None o
 
 
 def main():
-    #TODO: read query from file
     fp_postings = open(postings_file, 'r')
-    term_dict = load_dict_file(dictionary_file)
+    term_dictionary = load_dict_file(dictionary_file)
     
     with open(file_of_queries, 'r') as fp:
-        queries = fp.readlines()
-        for query in queries:
-            if "AND" in query:
+        query = fp.readlines()
+        for q in query:
+            if "AND" in q:
                 # call boolean retrieval -> e.g boolRetriev(query.split('AND'))
-                res = br.bool_retrieve(query.split("AND"), term_dict, fp_postings) 
+                res = br.bool_retrieve(query.split("AND"), term_dictionary, fp_postings)
                 print "bool " + res
             else:
                 # call freetext retrieval -> e.g freetextRetriev(query.split(' '))
@@ -77,9 +76,8 @@ def main():
                         terms.append(q)
                     elif s:
                         terms.append(s)
-                res = fr.freetext_retrieve(terms, term_dict, fp_postings)
+                res = fr.freetext_retrieve(terms, term_dictionary, fp_postings)
                 print res
-
 
 
 if __name__ == "__main__":

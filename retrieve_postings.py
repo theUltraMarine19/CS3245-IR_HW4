@@ -25,11 +25,12 @@ def get_postings(term, dictionary, fp_postings):
         # for terms of length 2, use the format of double indexing in dict'
         # check if term in dictionary 2
         if term[0] in dictionary:
-            if term[1] in dictionary[term[0]]:
+            if term[1] in dictionary:
                 # TODO: if we don't have enough docIDs in postings for a given term, check more synonyms
                 # TODO: since length 2, fist check synonyms for the first word, if not enough docIDs, check synonyms for 2. word
                 # if not in dict 2, call synonyms and check for each of the top synonym if in dict 2
                 # else get postings for term from dictionary 2 from postings.txt
+                # TODO: change to positional indexing
                 fp_postings.seek(dictionary[term[0]][term[1]]['H'])
                 postings_string = fp_postings.read(
                     dictionary[term[0]][term[1]]['T'] - dictionary[term[0]][term[1]]['H'])
@@ -43,6 +44,7 @@ def get_postings(term, dictionary, fp_postings):
                     # TODO: since length 3, fist check synonyms for the first word, if not enough docIDs, check synonyms for 2. word etc.
                     # if not in dict 2, call synonyms and check for each of the top synonym if in dict 2
                     # else get postings for term from dictionary 2 from postings.txt
+                    # TODO: change to positional indexing
                     fp_postings.seek(dictionary[term[0]][term[1]][term[2]]['H'])
                     postings_string = fp_postings.read(
                         dictionary[term[0]][term[1]][term[2]]['T'] - dictionary[term[0]][term[1]][term[2]]['H'])
@@ -58,6 +60,8 @@ def get_postings(term, dictionary, fp_postings):
     postings_list_tuple = []
     for e in postings_list:
         e_list = e.split('-')
-        postings_list_tuple.append((int(e_list[0]),int(e_list[1])))
+        tf = len(e_list) - 1
+        # if boolean retrieval is called with phrase, then add positional indexing at the end
+        postings_list_tuple.append((int(e_list[0]), tf))
 
     return postings_list_tuple

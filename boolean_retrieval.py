@@ -29,12 +29,11 @@ def merge_lists(l1, l2):
 
 # TODO: Can we have boolean retrieval and free text in one query
 
-def order_by_size(term_list, dictionary, fp_postings):
+def order_by_size(term_list, dictionary):
     """
     Evaluates the size of the posting list of a given expression (if existing in the term dictionary).
     :param term_list:
     :param dictionary:
-    :param fp_postings:
     :return: 0 - if not in the term dictionary
              document frequency of the term - if the term is present in the dictionary
     """
@@ -54,29 +53,30 @@ def order_by_size(term_list, dictionary, fp_postings):
             word2 = expr_words[1]
             if word1 not in dictionary:
                 # TODO: check for synonyms
-                return 0
-            elif word2 not in dictionary[word1]:
-                # TODO: check for synonyms
-                return 0
-            res = dictionary[word1][word2]['f']
+                synonym = word1
+                res = dictionary[synonym]['f']
+                #return 0
+            else:
+                # TODO: use positional indexing + check for synonyms
+                res = dictionary[word1]['f']
+                #return 0
         elif len(expr_words) == 3:
             word1 = expr_words[0]
             word2 = expr_words[1]
             word3 = expr_words[2]
             if word1 not in dictionary:
                 # TODO: check for synonyms
-                return 0
-            elif word2 not in dictionary[word1]:
-                # TODO: check for synonyms
-                return 0
-            elif word3 not in dictionary[word1][word2]:
-                return 0
-            # Approach 2 will be:
-            # TODO: use positional indexing
-            res = dictionary[word1][word2][word3]['f']
+                synonym = word1
+                res = dictionary[synonym]['f']
+                #return 0
+            else:
+                # TODO: use positional indexing + check for synonyms
+                res = dictionary[word1]['f']
+                #return 0
         else:
             print "Incorrect input"
-            return
+            return 0
+        # used to sort the boolean query by size for optimization purposes
         if res < smallest_f:
             smallest_index = cur_index
         cur_index += 1
