@@ -100,6 +100,5 @@ def freetext_retrieve(query, dictionary, fp_postings):
     # python sort method is stable and thus guarantee that docIDs with the same similarities
     # will remain in increasing order since they were inserted in the res_vect list in that order
     res_vect.sort(key=lambda x: x[1], reverse=True)
-    res = [i[0] for i in res_vect]
 
-    return res
+    return res_vect
