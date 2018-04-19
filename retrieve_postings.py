@@ -1,5 +1,6 @@
 import sys
 from nltk.corpus import wordnet
+from boolean_retrieval import merge_lists
 
 
 def get_synonyms(term):
@@ -126,13 +127,19 @@ def get_postings(term, dictionary, fp_postings):
                 synonyms_word1 = get_synonyms(term_list[0])
                 synonyms_word2 = get_synonyms(term_list[1])
 
-                fp_postings.seek(dictionary[term[0]]['H'])
-                postings1_str = fp_postings.read(dictionary[term[0]]['T'] - dictionary[term[0]]['H'])
-                fp_postings.seek(dictionary[term[1]]['H'])
-                postings2_str = fp_postings.read(dictionary[term[1]]['T'] - dictionary[term[0]]['H'])
-                postings_string = positional_intersect(postings1_str, postings2_str)
-                
-                postings_list = [x[0] for x in postings_string]
+                postings_one = get_postings(term_list[0], dictionary, fp_postings)
+                postings_two = get_postings(term_list[1], dictionary, fp_postings)
+                return merge_lists(postings_one, postings_two);
+
+                # fp_postings.seek(dictionary[term[0]]['H'])
+                # postings1_str = fp_postings.read(dictionary[term[0]]['T'] - dictionary[term[0]]['H'])
+                # fp_postings.seek(dictionary[term[1]]['H'])
+                # postings2_str = fp_postings.read(dictionary[term[1]]['T'] - dictionary[term[0]]['H'])
+                # postings_string = positional_intersect(postings1_str, postings2_str)
+                #
+                # postings_list = [x[0] for x in postings_string]
+
+
 
     elif len(term_list) == 3:
         if term_list[0] in dictionary:
@@ -143,24 +150,29 @@ def get_postings(term, dictionary, fp_postings):
                     # TODO: since length 3, fist check synonyms for the first word, if not enough docIDs, check synonyms for 2. word etc.
                     # if not in dict 2, call synonyms and check for each of the top synonym if in dict 2
                     # else get postings for term from dictionary 2 from postings.txt
-                    fp_postings.seek(dictionary[term[0]]['H'])
-                    postings1_string = fp_postings.read(dictionary[term[0]]['T'] - dictionary[term[0]]['H'])
-                    fp_postings.seek(dictionary[term[1]]['H'])
-                    postings2_string = fp_postings.read(dictionary[term[1]]['T'] - dictionary[term[1]]['H'])
-                    fp_postings.seek(dictionary[term[1]]['H'])
-                    postings3_string = fp_postings.read(dictionary[term[2]]['T'] - dictionary[term[2]]['H'])
-                    postings12_list = positional_intersect(postings1_string, postings2_string)
-                    postings23_list = positional_intersect(postings2_string, postings3_string)
-                    final_postings = []
-                    for tup1 in postings12_list:
-                        for tup2 in postings23_list:
-                            if tup1[0] == tup2[0] and tup1[1][1] == tup2[1][0]:
-                                final_postings.append(tup1[0])
-
-                    postings_list = final_postings            
+                    # fp_postings.seek(dictionary[term[0]]['H'])
+                    # postings1_string = fp_postings.read(dictionary[term[0]]['T'] - dictionary[term[0]]['H'])
+                    # fp_postings.seek(dictionary[term[1]]['H'])
+                    # postings2_string = fp_postings.read(dictionary[term[1]]['T'] - dictionary[term[1]]['H'])
+                    # fp_postings.seek(dictionary[term[1]]['H'])
+                    # postings3_string = fp_postings.read(dictionary[term[2]]['T'] - dictionary[term[2]]['H'])
+                    # postings12_list = positional_intersect(postings1_string, postings2_string)
+                    # postings23_list = positional_intersect(postings2_string, postings3_string)
+                    # final_postings = []
+                    # for tup1 in postings12_list:
+                    #     for tup2 in postings23_list:
+                    #         if tup1[0] == tup2[0] and tup1[1][1] == tup2[1][0]:
+                    #             final_postings.append(tup1[0])
+                    #
+                    # postings_list = final_postings
                     # OR second approach:
                     # complicated
                     # make use of positional indexes for fetching the postings
+
+                    postings_one = get_postings(term_list[0], dictionary, fp_postings)
+                    postings_two = get_postings(term_list[1], dictionary, fp_postings)
+                    postings_three = get_postings(term_list[2], dictionary, fp_postings)
+                    return merge_lists(merge_lists(postings_one, postings_two), postings_three)
     else:
         print "ERROR: phrase contains more than 3 terms"
         sys.exit(2)
