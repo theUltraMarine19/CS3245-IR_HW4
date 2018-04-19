@@ -76,6 +76,7 @@ def main():
             res = fr.freetext_retrieve(terms, term_dictionary, fp_postings)
         res = [x[0] for x in res]
 
+
     with open(file_of_output, 'w') as out:
         out_str = str()
         out_str += ' '.join(str(el) for el in res) + '\n'

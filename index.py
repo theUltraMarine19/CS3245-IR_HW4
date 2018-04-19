@@ -258,6 +258,6 @@ def write_meta_output(meta_dict, meta_count_dict, output_file_dictionary, output
 
 
 if __name__ == "__main__":
-    read_data_files(dataset_file)
+    read_data_files_test(dataset_file)
     write_unigram_dict_output(unigram_dict, unigram_count_dict, output_unigram_dict, output_unigram_postings)
     write_meta_output(meta_dict, meta_count_dict, output_meta_dict, output_meta_postings)

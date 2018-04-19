@@ -1,6 +1,31 @@
 import sys
 from nltk.corpus import wordnet
-from boolean_retrieval import merge_lists
+
+def merge_lists(l1, l2):
+    """
+    Create a list of all elements that are common for both lists.
+    :param l1: the first list that is part of the merge
+    :param l2: the second list that is part of the merge
+    :return: the result after applying the AND merge on the two lists
+    """
+    l1_len = len(l1)
+    l2_len = len(l2)
+    ans = []
+    if l1_len == 0 or l2_len == 0:
+        return ans
+    p1 = p2 = 0
+    while p1 < l1_len and p2 < l2_len:
+        l1_doc_id = l1[p1]
+        l2_doc_id = l2[p2]
+        if l1_doc_id == l2_doc_id:
+            ans.append(l1_doc_id)
+            p1 += 1
+            p2 += 1
+        elif l1_doc_id < l2_doc_id:
+            p1 += 1
+        else:
+            p2 += 1
+    return ans
 
 
 def get_synonyms(term):
@@ -112,7 +137,6 @@ def get_postings(term, dictionary, fp_postings):
             postings_list = [doc_id_position_string.split("-") for doc_id_position_string in postings_list]
             postings_list = [(doc_id_position_list[0], len(doc_id_position_list) - 1) for doc_id_position_list in
                              postings_list]
-            # return postings_list
 
     elif len(term_list) == 2:
         # for terms of length 2, use the format of double indexing in dict'
@@ -127,9 +151,15 @@ def get_postings(term, dictionary, fp_postings):
                 synonyms_word1 = get_synonyms(term_list[0])
                 synonyms_word2 = get_synonyms(term_list[1])
 
+                # print term_list[0], term_list[1]
+
                 postings_one = get_postings(term_list[0], dictionary, fp_postings)
                 postings_two = get_postings(term_list[1], dictionary, fp_postings)
-                return merge_lists(postings_one, postings_two);
+
+                postings_one.sort()
+                postings_two.sort()
+
+                postings_list = merge_lists(postings_one, postings_two)
 
                 # fp_postings.seek(dictionary[term[0]]['H'])
                 # postings1_str = fp_postings.read(dictionary[term[0]]['T'] - dictionary[term[0]]['H'])
@@ -172,19 +202,39 @@ def get_postings(term, dictionary, fp_postings):
                     postings_one = get_postings(term_list[0], dictionary, fp_postings)
                     postings_two = get_postings(term_list[1], dictionary, fp_postings)
                     postings_three = get_postings(term_list[2], dictionary, fp_postings)
-                    return merge_lists(merge_lists(postings_one, postings_two), postings_three)
+
+                    # print term_list[0], postings_one
+                    # print term_list[1], postings_two
+                    # print term_list[2], postings_three
+
+                    postings_one = [x[0] for x in postings_one]
+                    postings_two = [x[0] for x in postings_two]
+                    postings_three = [x[0] for x in postings_three]
+
+                    postings_one.sort()
+                    postings_two.sort()
+                    postings_three.sort()
+
+                    # print term_list[0], postings_one
+                    # print term_list[1], postings_two
+                    # print term_list[2], postings_three
+
+                    first = merge_lists(postings_one, postings_two)
+                    postings_list = merge_lists(first, postings_three)
+
     else:
         print "ERROR: phrase contains more than 3 terms"
         sys.exit(2)
     # if successfully reaches here without error, return fetched postings list
 
-    postings_list_tuple = []
-    for e in postings_list:
-        # e_list = e.split('-')
-        # tf = len(e_list) - 1
-        # if boolean retrieval is called with phrase, then add positional indexing at the end
-        postings_list_tuple.append((int(e[0]), e[1]))
+    # postings_list_tuple = []
+    # for e in postings_list:
+    #     # e_list = e.split('-')
+    #     # tf = len(e_list) - 1
+    #     # if boolean retrieval is called with phrase, then add positional indexing at the end
+    #     postings_list_tuple.append((int(e[0]), e[1]))
 
-    return postings_list_tuple
+    return postings_list
+    # return sorted(postings_list_tuple, key=lambda tup: tup[0])
 
 

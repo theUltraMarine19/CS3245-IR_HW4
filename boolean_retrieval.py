@@ -82,10 +82,16 @@ def bool_retrieve(query, dictionary, fp_postings):
     res = []
     start = True
     for term in query:
-        term = term.strip()
-        term = re.sub(r'[^a-zA-Z0-9]', '', str(term))
-        term = ps.stem(term.lower())
-        term_postings = get_postings(term.split(), dictionary, fp_postings)
+        term_list = term.split()
+        # if len(term_list) == 1:
+        result_term_list = []
+        for t in term_list:
+            t = t.strip()
+            t = re.sub(r'[^a-zA-Z0-9]', '', str(t))
+            t = ps.stem(t.lower())
+            result_term_list.append(t)
+
+        term_postings = get_postings(result_term_list, dictionary, fp_postings)
         if start:
             res = term_postings
         else:
