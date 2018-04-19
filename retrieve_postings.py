@@ -11,7 +11,7 @@ def get_synonyms(term):
     """
     term_list = term.split()
     if len(term_list) > 1:
-        print "ERROR: Passing more than one word to gen_synonyms"
+        print "ERROR: Passing more than one word to get_synonyms"
         return -1
 
     # get synonyms
