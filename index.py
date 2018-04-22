@@ -217,14 +217,15 @@ def write_unigram_dict_output(ngram_dict, ngram_count_dict, output_file_dictiona
 
         for term, doc_id_dict in ngram_dict.iteritems():
             unigram_posting = []
+            doc_id_tf_list = sorted(doc_id_dict.items(), key=lambda s: s[0])
 
-            for term_or_doc_id, dict_or_tf in doc_id_dict.iteritems():
+            for (doc_id, tf) in doc_id_tf_list:
                     # handle unigram
-                    if term_or_doc_id not in doc_norm:
-                        values = [1 + math.log(i, 10) for i in doc_words[term_or_doc_id].values()]
+                    if doc_id not in doc_norm:
+                        values = [1 + math.log(i, 10) for i in doc_words[doc_id].values()]
                         norm_val = math.sqrt(sum(i ** 2 for i in values))
-                        doc_norm[term_or_doc_id] = norm_val
-                    unigram_posting.append(str(term_or_doc_id) + '-' + str(dict_or_tf))
+                        doc_norm[doc_id] = norm_val
+                    unigram_posting.append(str(doc_id) + '-' + str(tf))
             
             posting_str = " ".join(str(e) for e in unigram_posting) + " "
 
