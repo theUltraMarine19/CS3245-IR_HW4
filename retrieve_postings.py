@@ -156,6 +156,9 @@ def get_postings(term, dictionary, fp_postings):
                 postings_one = get_postings(term_list[0], dictionary, fp_postings)
                 postings_two = get_postings(term_list[1], dictionary, fp_postings)
 
+                postings_one = [x[0] for x in postings_one]
+                postings_two = [x[0] for x in postings_two]
+
                 postings_one.sort()
                 postings_two.sort()
 
@@ -168,8 +171,6 @@ def get_postings(term, dictionary, fp_postings):
                 # postings_string = positional_intersect(postings1_str, postings2_str)
                 #
                 # postings_list = [x[0] for x in postings_string]
-
-
 
     elif len(term_list) == 3:
         if term_list[0] in dictionary:
@@ -203,10 +204,6 @@ def get_postings(term, dictionary, fp_postings):
                     postings_two = get_postings(term_list[1], dictionary, fp_postings)
                     postings_three = get_postings(term_list[2], dictionary, fp_postings)
 
-                    # print term_list[0], postings_one
-                    # print term_list[1], postings_two
-                    # print term_list[2], postings_three
-
                     postings_one = [x[0] for x in postings_one]
                     postings_two = [x[0] for x in postings_two]
                     postings_three = [x[0] for x in postings_three]
@@ -214,10 +211,6 @@ def get_postings(term, dictionary, fp_postings):
                     postings_one.sort()
                     postings_two.sort()
                     postings_three.sort()
-
-                    # print term_list[0], postings_one
-                    # print term_list[1], postings_two
-                    # print term_list[2], postings_three
 
                     first = merge_lists(postings_one, postings_two)
                     postings_list = merge_lists(first, postings_three)

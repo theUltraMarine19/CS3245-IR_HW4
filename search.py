@@ -1,7 +1,6 @@
 import json
 import sys
 import getopt
-import math
 import re
 
 import boolean_retrieval as br
@@ -74,8 +73,6 @@ def main():
                 elif s:
                     terms.append(s)
             res = fr.freetext_retrieve(terms, term_dictionary, fp_postings)
-        res = [x[0] for x in res]
-
 
     with open(file_of_output, 'w') as out:
         out_str = str()

@@ -101,4 +101,4 @@ def freetext_retrieve(query, dictionary, fp_postings):
     # will remain in increasing order since they were inserted in the res_vect list in that order
     res_vect.sort(key=lambda x: x[1], reverse=True)
 
-    return res_vect
+    return [x[0] for x in res_vect]
