@@ -142,7 +142,7 @@ def get_postings(term, dictionary, fp_postings):
                 postings2_str = fp_postings.read(dictionary[term[1]]['T'] - dictionary[term[0]]['H'])
                 postings_string = positional_intersect(postings1_str, postings2_str)
                 # print postings_string
-                postings_list = [x[0] for x in postings_string]
+                postings_list = list(set([x[0] for x in postings_string]))
 
     elif len(term_list) == 3:
         if term_list[0] in dictionary:
@@ -160,6 +160,7 @@ def get_postings(term, dictionary, fp_postings):
                     fp_postings.seek(dictionary[term[2]]['H'])
                     postings3_string = fp_postings.read(dictionary[term[2]]['T'] - dictionary[term[2]]['H'])
                     postings12_list = positional_intersect(postings1_string, postings2_string)
+                    # print postings12_list
                     postings23_list = positional_intersect(postings2_string, postings3_string)
                     final_postings = []
                     for tup1 in postings12_list:
@@ -167,7 +168,7 @@ def get_postings(term, dictionary, fp_postings):
                             if tup1[0] == tup2[0] and tup1[1][1] == tup2[1][0]:
                                 final_postings.append(tup1[0])
 
-                    postings_list = final_postings    
+                    postings_list = list(set(final_postings))    
                     # print final_postings        
                     # OR second approach:
                     # complicated
