@@ -32,8 +32,8 @@ def positional_intersect(l1, l2):
     :param l2: the second list that is part of the merge
     :return: the result after applying the AND merge on the two lists
     """
-    l1_len = len(l1.split(' '))
-    l2_len = len(l2.split(' '))
+    l1_len = len(l1.split(' ')) -1 
+    l2_len = len(l2.split(' ')) -1
     ans = []
 
     if l1_len == 0 or l2_len == 0:
@@ -46,32 +46,50 @@ def positional_intersect(l1, l2):
         l1_doc_id = l1.split(' ')[p1].split('-')[0]
         l2_doc_id = l2.split(' ')[p2].split('-')[0]
 
+        # if (l1_doc_id >= '246391'):
+        #     print l1_doc_id, l2_doc_id
+        
+
+        # if (l2_doc_id == '246391'):
+        #     print "2", l1_doc_id
+        # if l1_doc_id == '246391' and l2_doc_id == '246391':
+        #     print "True"
+        
+        # print l1_doc_id, l2_doc_id
+        # print p1, l1_len
+        # print p2, l2_len
         if l1_doc_id == l2_doc_id:
 
-            pos_ans = []
+            # pos_ans = []
             pp1 = pp2 = 0
 
             pl1_len = len(l1.split(' ')[p1].split('-')[1:])
             pl2_len = len(l2.split(' ')[p2].split('-')[1:])
 
-            while pp1 < pl1_len:
-                while pp2 < pl2_len:
+            while pp1 < pl1_len and pp2 < pl2_len:
 
-                    pos1 = l1.split(' ')[p1].split('-')[pp1 + 1]
-                    pos2 = l2.split(' ')[p2].split('-')[pp2 + 1]
-                    if (int(pos2) - int(pos1)) == 1:
-                        pos_ans(pos2)
-                    elif pos2 > pos1:
-                        break
+                pos1 = l1.split(' ')[p1].split('-')[pp1 + 1]
+                pos2 = l2.split(' ')[p2].split('-')[pp2 + 1]
+                # if (l1_doc_id == '246391'):
+                #         print pos1, pos2
+                if (int(pos2) - int(pos1)) == 1:
+                    ans.append((l1_doc_id, (pos1, pos2)))
+                    pp1 += 1
+                    pp2 += 1
+                    # if (l1_doc_id == '246391'):
+                    #     print pos1
+                elif int(pos2) > int(pos1) + 1:
+                    pp1 += 1
+                else:
                     pp2 += 1
 
-                while len(pos_ans) != 0 and (pos_ans[0] - pos1) != 1:
-                    pos_ans = pos_ans[1:]
+                # while len(pos_ans) != 0 and (int(pos_ans[0]) - int(pos1)) != 1:
+                #     pos_ans = pos_ans[1:]
 
-                for ps in pos_ans:
-                    ans.append((l1_doc_id, (pos1, ps)))
+                # for ps in pos_ans:
+                #     ans.append((l1_doc_id, (pos1, ps)))
 
-                pp1 += 1
+                # pp1 += 1
 
             # ans.append(l1_doc_id)
             p1 += 1
@@ -91,6 +109,7 @@ def get_postings(term, dictionary, fp_postings):
     :param fp_postings:
     :return: postings for the given term
     """
+    # print term
     postings_list = []
     if type(term) != list:
         term_list = term.split()
@@ -123,8 +142,8 @@ def get_postings(term, dictionary, fp_postings):
                 # if not in dict 2, call synonyms and check for each of the top synonym if in dict 2
                 # else get postings for term from dictionary 2 from postings.txt
                 # TODO: change to positional indexing
-                synonyms_word1 = get_synonyms(term_list[0])
-                synonyms_word2 = get_synonyms(term_list[1])
+                # synonyms_word1 = get_synonyms(term_list[0])
+                # synonyms_word2 = get_synonyms(term_list[1])
 
                 fp_postings.seek(dictionary[term[0]]['H'])
                 postings1_str = fp_postings.read(dictionary[term[0]]['T'] - dictionary[term[0]]['H'])
@@ -147,7 +166,7 @@ def get_postings(term, dictionary, fp_postings):
                     postings1_string = fp_postings.read(dictionary[term[0]]['T'] - dictionary[term[0]]['H'])
                     fp_postings.seek(dictionary[term[1]]['H'])
                     postings2_string = fp_postings.read(dictionary[term[1]]['T'] - dictionary[term[1]]['H'])
-                    fp_postings.seek(dictionary[term[1]]['H'])
+                    fp_postings.seek(dictionary[term[2]]['H'])
                     postings3_string = fp_postings.read(dictionary[term[2]]['T'] - dictionary[term[2]]['H'])
                     postings12_list = positional_intersect(postings1_string, postings2_string)
                     postings23_list = positional_intersect(postings2_string, postings3_string)
@@ -157,7 +176,8 @@ def get_postings(term, dictionary, fp_postings):
                             if tup1[0] == tup2[0] and tup1[1][1] == tup2[1][0]:
                                 final_postings.append(tup1[0])
 
-                    postings_list = final_postings            
+                    postings_list = final_postings    
+                    # print final_postings        
                     # OR second approach:
                     # complicated
                     # make use of positional indexes for fetching the postings
@@ -166,13 +186,18 @@ def get_postings(term, dictionary, fp_postings):
         sys.exit(2)
     # if successfully reaches here without error, return fetched postings list
 
+    # print postings_list
     postings_list_tuple = []
     for e in postings_list:
         # e_list = e.split('-')
         # tf = len(e_list) - 1
         # if boolean retrieval is called with phrase, then add positional indexing at the end
-        postings_list_tuple.append((int(e[0]), e[1]))
+        if (type(e) == tuple):
+            postings_list_tuple.append((int(e[0]), e[1]))
+        else
+            postings_list_tuple.append((int(e), -1))
 
+    # print postings_list_tuple
     return postings_list_tuple
 
 
