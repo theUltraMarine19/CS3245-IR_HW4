@@ -41,43 +41,34 @@ def positional_intersect(l1, l2):
     elif (l1_len == 1 and l1.split(' ')[0] == '') or (l2_len == 1 and l2.split(' ')[0] == ''):
         return ans
 
+    pl1 = l1.split(' ')
+    pl2 = l2.split(' ')
+
     p1 = p2 = 0
     while p1 < l1_len and p2 < l2_len:
-        l1_doc_id = l1.split(' ')[p1].split('-')[0]
-        l2_doc_id = l2.split(' ')[p2].split('-')[0]
+        pl1pos = pl1[p1].split('-')
+        pl2pos = pl2[p2].split('-')
+        l1_doc_id = pl1pos[0]
+        l2_doc_id = pl2pos[0]
 
-        # if (l1_doc_id >= '246391'):
-        #     print l1_doc_id, l2_doc_id
-        
-
-        # if (l2_doc_id == '246391'):
-        #     print "2", l1_doc_id
-        # if l1_doc_id == '246391' and l2_doc_id == '246391':
-        #     print "True"
-        
         # print l1_doc_id, l2_doc_id
-        # print p1, l1_len
-        # print p2, l2_len
         if l1_doc_id == l2_doc_id:
 
             # pos_ans = []
             pp1 = pp2 = 0
 
-            pl1_len = len(l1.split(' ')[p1].split('-')[1:])
-            pl2_len = len(l2.split(' ')[p2].split('-')[1:])
+            pl1_len = len(pl1pos[1:])
+            pl2_len = len(pl2pos[1:])
 
             while pp1 < pl1_len and pp2 < pl2_len:
 
-                pos1 = l1.split(' ')[p1].split('-')[pp1 + 1]
-                pos2 = l2.split(' ')[p2].split('-')[pp2 + 1]
-                # if (l1_doc_id == '246391'):
-                #         print pos1, pos2
+                pos1 = pl1pos[pp1 + 1]
+                pos2 = pl2pos[pp2 + 1]
                 if (int(pos2) - int(pos1)) == 1:
                     ans.append((l1_doc_id, (pos1, pos2)))
                     pp1 += 1
                     pp2 += 1
-                    # if (l1_doc_id == '246391'):
-                    #     print pos1
+                    
                 elif int(pos2) > int(pos1) + 1:
                     pp1 += 1
                 else:
@@ -150,7 +141,7 @@ def get_postings(term, dictionary, fp_postings):
                 fp_postings.seek(dictionary[term[1]]['H'])
                 postings2_str = fp_postings.read(dictionary[term[1]]['T'] - dictionary[term[0]]['H'])
                 postings_string = positional_intersect(postings1_str, postings2_str)
-                
+                # print postings_string
                 postings_list = [x[0] for x in postings_string]
 
     elif len(term_list) == 3:
