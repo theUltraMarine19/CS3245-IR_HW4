@@ -2,7 +2,7 @@ from retrieve_postings import get_postings
 import re
 from nltk.stem.porter import PorterStemmer
 
-ps = PorterStemmer()
+# ps = PorterStemmer()
 
 def merge_lists(l1, l2):
     """
@@ -90,7 +90,7 @@ def bool_retrieve(query, dictionary, fp_postings):
             term = term_list[i]
             term = term.strip()
             term = re.sub(r'[^a-zA-Z0-9]', '', str(term))
-            term = ps.stem(term.lower())
+            term = term.lower()
             term_list[i] = term
 
         term_postings = get_postings(term_list, dictionary, fp_postings)
