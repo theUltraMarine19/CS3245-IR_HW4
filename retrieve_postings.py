@@ -59,7 +59,7 @@ def positional_intersect(l1, l2):
 
                     pos1 = l1.split(' ')[p1].split('-')[pp1 + 1]
                     pos2 = l2.split(' ')[p2].split('-')[pp2 + 1]
-                    if (pos2 - pos1) == 1:
+                    if (int(pos2) - int(pos1)) == 1:
                         pos_ans(pos2)
                     elif pos2 > pos1:
                         break

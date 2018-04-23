@@ -80,13 +80,18 @@ def bool_retrieve(query, dictionary, fp_postings):
     :return: return the result of all relevant docIDs
     """
     res = []
-    start = True
-    for term in query:
-        term = term.strip()
-        term = re.sub(r'[^a-zA-Z0-9]', '', str(term))
-        term = ps.stem(term.lower())
-        term_postings = get_postings(term.split(), dictionary, fp_postings)
-        if start:
+    for index, term in enumerate(query):
+        term_list = term.split()
+
+        for i in range(len(term_list)):
+            term = term_list[i]
+            term = term.strip()
+            term = re.sub(r'[^a-zA-Z0-9]', '', str(term))
+            term = ps.stem(term.lower())
+            term_list[i] = term
+
+        term_postings = get_postings(term_list, dictionary, fp_postings)
+        if index == 0:
             res = term_postings
         else:
             res = merge_lists(res, term_postings)
