@@ -131,7 +131,7 @@ def main():
     fp_postings = open(postings_file, 'r')
     term_dictionary = load_dict_file(dictionary_file)
 
-    metadata_dictionary = load_meta_dict_file("metadict.txt")
+    # metadata_dictionary = load_meta_dict_file("metadict.txt")
     
     with open(file_of_queries, 'r') as fp:
         query = fp.readlines()
