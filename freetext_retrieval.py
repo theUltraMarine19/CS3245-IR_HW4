@@ -50,7 +50,8 @@ def freetext_retrieve(query, dictionary, fp_postings):
         if len(string_term) == 1:
             # TODO: important, return handled term
             val, new_term = tf_val_for_term(term, stemmed_query.count(term), dictionary)
-            query_vec.append(val)
+            if (new_term is not None):
+                query_vec.append(val)
         else:
             print "Incorrect input"
             break
