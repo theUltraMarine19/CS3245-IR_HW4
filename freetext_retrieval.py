@@ -133,7 +133,7 @@ def freetext_retrieve(query, dictionary, fp_postings):
                         norm_doc_vects[doc] = [0]
 
     res_vect = get_cosine_similarity(query_vec, norm_doc_vects)
-    expanded_query_vec = get_expanded_query(query_vec, norm_doc_vects, res_vect)
-    res_vect = get_cosine_similarity(expanded_query_vec, norm_doc_vects)
+    # expanded_query_vec = get_expanded_query(query_vec, norm_doc_vects, res_vect)
+    # res_vect = get_cosine_similarity(expanded_query_vec, norm_doc_vects)
 
     return res_vect
