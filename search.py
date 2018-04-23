@@ -1,7 +1,6 @@
 import json
 import sys
 import getopt
-import math
 import re
 
 import boolean_retrieval as br
