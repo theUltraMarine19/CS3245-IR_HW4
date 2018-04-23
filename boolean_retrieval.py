@@ -20,6 +20,7 @@ def merge_lists(l1, l2):
     while p1 < l1_len and p2 < l2_len:
         l1_doc_id = l1[p1]
         l2_doc_id = l2[p2]
+        
         # print l1_doc_id, l2_doc_id
         if l1_doc_id == l2_doc_id:
             ans.append(l1_doc_id)
@@ -98,5 +99,5 @@ def bool_retrieve(query, dictionary, fp_postings):
             res = term_postings
         else:
             res = merge_lists(res, term_postings)
-    # print res
+        # print res
     return res

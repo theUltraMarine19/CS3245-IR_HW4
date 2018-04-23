@@ -143,6 +143,7 @@ def get_postings(term, dictionary, fp_postings):
                 postings_string = positional_intersect(postings1_str, postings2_str)
                 # print postings_string
                 postings_list = list(set([x[0] for x in postings_string]))
+                postings_list = sorted(postings_list)
 
     elif len(term_list) == 3:
         if term_list[0] in dictionary:
@@ -168,7 +169,8 @@ def get_postings(term, dictionary, fp_postings):
                             if tup1[0] == tup2[0] and tup1[1][1] == tup2[1][0]:
                                 final_postings.append(tup1[0])
 
-                    postings_list = list(set(final_postings))    
+                    postings_list = list(set(final_postings))
+                    postings_list = sorted(postings_list)    
                     # print final_postings        
                     # OR second approach:
                     # complicated

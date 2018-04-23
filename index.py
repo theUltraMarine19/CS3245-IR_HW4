@@ -5,6 +5,7 @@ import getopt
 import json
 import math
 import os
+import numpy
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.stem.porter import PorterStemmer
 
@@ -26,6 +27,8 @@ all_doc_ids = []
 ps = PorterStemmer()
 
 doc_words = {}
+doc_norm_words = {}
+doc_matrix = []
 
 # the size of the training data set
 collection_size = 0
@@ -162,6 +165,26 @@ def build_positional_index_dict(doc_id, doc_string):
                     doc_words[doc_id][term] = 1
             else:
                 doc_words[doc_id] = {term : 1}
+
+# def build_thesaurus():
+
+#     sum = [0.0] * len(doc_words)
+#     ctr = 0
+#     for doc_id in doc_words:
+        
+#         for term in doc_words[doc_id]:
+#             sum[ctr] += doc_words[doc_id][term] ** 2
+
+#         for term in doc_words[doc_id]:
+#             doc_norm_words[doc_id][term] = doc_words[doc_id][term] / sqrt(sum[ctr])
+
+#         ctr += 1
+
+#     for doc_id in doc_norm_words:
+#         for term in positional_dict:
+#             if term in doc_norm_words[doc_id]:
+                
+                
 
 
 def build_meta_dict(doc_id, title, content, date_posted, court):
