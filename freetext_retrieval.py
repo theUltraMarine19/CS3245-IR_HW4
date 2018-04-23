@@ -102,6 +102,7 @@ def freetext_retrieve(query, dictionary, fp_postings):
             continue
 
         cur_docs = get_postings(new_term, dictionary, fp_postings)
+        cur_docs = [(int(x[0]), x[1]) for x in cur_docs]
         for (doc, tf) in cur_docs:
             norm = dictionary['DOC_NORM'][str(doc)]
             t_f = 1 + math.log(tf, 10) if tf != 0 else 0.0
