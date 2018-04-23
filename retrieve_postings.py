@@ -194,7 +194,7 @@ def get_postings(term, dictionary, fp_postings):
         # if boolean retrieval is called with phrase, then add positional indexing at the end
         if (type(e) == tuple):
             postings_list_tuple.append((int(e[0]), e[1]))
-        else
+        else:
             postings_list_tuple.append((int(e), -1))
 
     # print postings_list_tuple

@@ -59,7 +59,7 @@ def main():
     
     with open(file_of_queries, 'r') as fp:
         query = fp.readlines()
-        if "AND" in query[0]:
+        if "AND" in query[0] or "\"" in query[0][0].strip():
             # call boolean retrieval -> e.g boolRetriev(query.split('AND'))
             res = br.bool_retrieve(query[0].split("AND"), term_dictionary, fp_postings)
         else:
