@@ -83,20 +83,17 @@ def bool_retrieve(query, dictionary, fp_postings):
     """
     res = []
     for index, term in enumerate(query):
-        term_list = term.split()
-        
+        term = re.sub(r'\"', '', term)
+        term_list = term.strip().split()
         for i in range(len(term_list)):
             term = term_list[i]
             term = term.strip()
             term = re.sub(r'[^a-zA-Z0-9]', '', str(term))
             term = ps.stem(term.lower())
             term_list[i] = term
-            # print term
 
-        # print term_list
         term_postings = get_postings(term_list, dictionary, fp_postings)
         term_postings = [x[0] for x in term_postings]
-        # print term_postings
         if index == 0:
             res = term_postings
         else:

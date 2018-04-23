@@ -2,6 +2,7 @@ import json
 import sys
 import getopt
 import re
+import datetime
 
 import boolean_retrieval as br
 import freetext_retrieval as fr
@@ -40,16 +41,17 @@ court_metadata = {"UK Military Court":0.5,
                     "SG District Court":0.5, 
                     "NSW Children's Court":0.5, 
                     "UK Supreme Court": 1.0, 
-                    "SG Magistrates' Court":0.5, 
+                    "SG Magistrates' Court": 0.5,
                     "UK High Court": 0.75, 
                     "HK High Court": 0.75, 
-                    "NSW Medical Tribunal": , 
-                    "Federal Court of Australia":1.0, 
-                    "HK Court of First Instance":0.5, 
-                    "UK Court of Appeal":1.0, 
-                    "NSW Civil and Administrative Tribunal":0.25, 
+                    "NSW Medical Tribunal": 0.25,
+                    "Federal Court of Australia": 1.0,
+                    "HK Court of First Instance": 0.5,
+                    "UK Court of Appeal": 1.0,
+                    "NSW Civil and Administrative Tribunal": 0.25,
                     "SG Court of Appeal": 1.0, 
-                    "UK Crown Court":0.75}
+                    "UK Crown Court": 0.75}
+
 
 def get_date_factor(date_string):
     split_string = date_string.split(" ")
@@ -150,7 +152,6 @@ def main():
             res = fr.freetext_retrieve(terms, term_dictionary, fp_postings)
             # res = zones_metadata(res, metadata_dictionary)
             res = [x[0] for x in res]
-
 
     with open(file_of_output, 'w') as out:
         out_str = str()
