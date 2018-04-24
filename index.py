@@ -20,7 +20,6 @@ sys.setdefaultencoding('ISO-8859-1')
 unigram_dict = {}
 unigram_count_dict = {}
 meta_dict = {"title":{}, "date_posted":{}, "court":{}}
-meta_count_dict = {"title":{}, "date_posted":{}, "court":{}}
 stemmer_dict = {}
 
 all_doc_ids = []
@@ -34,7 +33,6 @@ collection_size = 0
 csv.field_size_limit(sys.maxsize)
 
 output_meta_dict = "metadict.txt"
-output_meta_postings = "metapostings.txt"
 
 # params:
 # -i dataset.csv -d dictionary.txt -p postings.txt
@@ -163,16 +161,9 @@ def build_unigram_dict(doc_id, doc_string):
 
 
 def build_meta_dict(doc_id, title, content, date_posted, court):
-    if title not in meta_dict['title']:
-        meta_dict['title'][title] = []
-    meta_dict['title'][title].append(doc_id)
-    if date_posted not in meta_dict['date_posted']:
-        meta_dict['date_posted'][date_posted] = []
-    meta_dict['date_posted'][date_posted].append(doc_id)
-    if court not in meta_dict['court']:
-        meta_dict['court'][court] = []
-    meta_dict['court'][court].append(doc_id)
-
+    meta_dict['title'][doc_id] = title
+    meta_dict['date_posted'][doc_id] = date_posted
+    meta_dict['court'][doc_id] = court
 
 
 def build_unigram_dictionary_count_dict(ngram_dictionary_count_dict, term='', head=0, tail=0, freq=0):
@@ -186,19 +177,6 @@ def build_unigram_dictionary_count_dict(ngram_dictionary_count_dict, term='', he
     :return: None
     """
     ngram_dictionary_count_dict[term] = {'H': head, 'T': tail, 'F': freq}
-
-
-def build_meta_count_dict(category='', term='', head=0, tail=0, freq=0):
-    """
-    Build the dictionary with term as keys and the frequency count, head and tail byte location as values.
-    :param category: one of the catergories of metadata
-    :param term: the term to be added to the dictionary
-    :param head:
-    :param tail:
-    :param freq:
-    :return: None
-    """
-    meta_count_dict[category][term] = {'H': head, 'T': tail, 'F': freq}
 
 
 def write_unigram_dict_output(ngram_dict, ngram_count_dict, output_file_dictionary, output_file_postings):
@@ -241,24 +219,12 @@ def write_unigram_dict_output(ngram_dict, ngram_count_dict, output_file_dictiona
         json.dump(unigram_count_dict, out_dict)
 
 
-def write_meta_output(meta_dict, meta_count_dict, output_file_dictionary, output_file_postings):
-    with open(output_file_postings, 'w') as out_postings:
-        for category, term_dict in meta_dict.iteritems():
-            for term, posting in term_dict.iteritems():
-                posting.sort()
-                posting_str = " ".join(str(e) for e in posting) + " "
-                head = out_postings.tell()
-                out_postings.write(posting_str)
-                freq = len(posting)
-                tail = out_postings.tell()
-
-                build_meta_count_dict(category, term, head, tail, freq)
-
+def write_meta_output(meta_dict, output_file_dictionary):
     with open(output_file_dictionary, 'w') as out_dict:
-        json.dump(meta_count_dict, out_dict)
+        json.dump(meta_dict, out_dict)
 
 
 if __name__ == "__main__":
     read_data_files(dataset_file)
     write_unigram_dict_output(unigram_dict, unigram_count_dict, output_unigram_dict, output_unigram_postings)
-    write_meta_output(meta_dict, meta_count_dict, output_meta_dict, output_meta_postings)
+    write_meta_output(meta_dict, output_meta_dict)
