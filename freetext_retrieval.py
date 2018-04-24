@@ -99,10 +99,8 @@ def freetext_retrieve(query, dictionary, fp_postings):
     for term in stemmed_query_set:
         term_list = term.split()
         # don't check if term is in dictionary, because it will try to find synonyms in build_vec methods
-        cur_docs = []
         if len(term_list) == 1:
-            cur_docs = get_postings(term, dictionary, fp_postings)
-
+            # TODO: important, return handled term
             val, new_term = tf_val_for_term(term, stemmed_query.count(term), dictionary)
             query_vec.append(val)
         else:
@@ -111,8 +109,8 @@ def freetext_retrieve(query, dictionary, fp_postings):
 
         if new_term is None:
             continue
-        print cur_docs
 
+        cur_docs = get_postings(new_term, dictionary, fp_postings)
         cur_docs = [(int(x[0]), x[1]) for x in cur_docs]
         for (doc, tf) in cur_docs:
             norm = dictionary['DOC_NORM'][str(doc)]

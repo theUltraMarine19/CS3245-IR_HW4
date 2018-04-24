@@ -8,7 +8,7 @@ import boolean_retrieval as br
 import freetext_retrieval as fr
 
 # params:
-# -d posdict.txt -p pospostings.txt -q new_queries.txt -o output.txt
+# -d posdict.txt -p pospostings.txt -q queries.txt -o output.txt
 
 '''
 ======================
