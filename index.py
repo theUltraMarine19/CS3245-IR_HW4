@@ -13,27 +13,29 @@ from nltk.corpus import stopwords
 reload(sys)
 sys.setdefaultencoding('ISO-8859-1')
 
-# TODO ask if we're only allowed to submit one dictionary file => merging bigram and unigram dict together
-# TODO metadata dictionary
-# TODO faster computation for log frequency from Svilen
-# TODO think about the benefits of stemming
-# TODO check if all the memory is able to store all dictionaries before we write them out
-
+# dictionaries for words and metadata
 positional_dict = {}
 positional_count_dict = {}
 meta_dict = {"title":{}, "date_posted":{}, "court":{}}
+
+# cache for stemmer
 stemmer_dict = {}
+
+# thesaurus dictionary
 thesaurus = {}
 positional_list = []
 
 all_doc_ids = []
 ps = PorterStemmer()
 
+# dictionaries for
 doc_words = {}
 doc_norm_words = {}
 doc_matrix = []
 SIM_BOUND = 8
 THRESHOLD = 6
+
+# list of stop words
 stop = set(stopwords.words('english'))
 
 # the size of the training data set
@@ -144,7 +146,8 @@ def build_positional_index_dict(doc_id, doc_string):
         for word in words:
             term = re.sub(r'[^a-zA-Z0-9]', '', str(word))
             term = term.lower()
-
+            
+            # check if stem exists in the cache
             cache = stemmer_dict.get(term, None)
             if cache is not None:
                 term = cache
@@ -152,7 +155,7 @@ def build_positional_index_dict(doc_id, doc_string):
                 stem_res = ps.stem(term)
                 stemmer_dict[term] = stem_res
                 term = stem_res
-
+            # make sure it's not empty word
             if len(term) != 0:
                 if term in positional_dict:
                     if doc_id not in positional_dict[term]:
@@ -164,7 +167,8 @@ def build_positional_index_dict(doc_id, doc_string):
                     positional_dict[term][doc_id] = [count]
 
                 count += 1
-
+    
+                # used to normalization values calculation
                 if doc_id in doc_words:
                     if term in doc_words[doc_id]:
                         doc_words[doc_id][term] += 1
@@ -174,14 +178,16 @@ def build_positional_index_dict(doc_id, doc_string):
                     doc_words[doc_id] = {term : 1}
 
 def transform():
-
-    # counter = 0
+    """
+    Helper funcion for building the thesaurus
+    """
     for term in positional_dict:
         positional_list.append(term)
-        # counter += 1
 
 def build_thesaurus():
-
+    """
+    Building the thesaurus for use in query expansion later on 
+    """
     sum = [0.0] * len(doc_words)
     ctr = 0
 
@@ -198,7 +204,6 @@ def build_thesaurus():
 
 
     for doc_id in doc_norm_words:
-        # print doc_id
         tmp = []
         for term in positional_dict:
             if term in doc_norm_words[doc_id]:
@@ -208,22 +213,12 @@ def build_thesaurus():
         doc_matrix.append(tmp)
 
     doc_mat = np.matrix(doc_matrix)
-    # print doc_mat
     doc_mat_transpose = doc_mat.transpose()
     co_occurence_mat = np.matmul(doc_mat_transpose, doc_mat)
-    # print co_occurence_mat
-    # print doc_mat_transpose.shape, doc_mat.shape
 
     for i in range(len(positional_dict)):
-        # if (i <= 2):
-        #     print positional_list[i]
-            # print co_occurence_mat[i].tolist()[0]
         sim_list = sorted(enumerate(co_occurence_mat[i].tolist()[0]), key = lambda x : -x[1])
-        # if (i <= 2):
-        #     print sim_list[1:50]
         sim_terms = [positional_list[k[0]] for k in sim_list]
-        # if (i <= 2):
-        #     print sim_terms[1:50]
         sim_terms = [term for term in sim_terms if term not in stop]
         thesaurus[positional_list[i]] = sim_terms[1 : SIM_BOUND]
 
@@ -294,20 +289,27 @@ def write_positional_output(positional_dict, positional_count_dict, output_file_
             build_positional_index_count_dict(positional_count_dict, term, head, tail, freq)
 
     with open(output_file_dictionary, 'w') as out_dict:
-        positional_count_dict['DOC_NORM'] = doc_norm
-        positional_count_dict['N'] = collection_size
+        # dump to the word dictionary file
+        positional_count_dict['DOC_NORM'] = doc_norm #normalization values for documents
+        positional_count_dict['N'] = collection_size # total number of documents
         json.dump(positional_count_dict, out_dict)
 
 
 def write_meta_output(meta_dict, output_file_dictionary):
+    """
+    Dump the metadata to meta data dictiionary file:param positional_dict:
+    :param meta_dict:
+    :param output_file_dictionary:
+    :return: None
+    """
     with open(output_file_dictionary, 'w') as out_dict:
         json.dump(meta_dict, out_dict)
 
 
 if __name__ == "__main__":
-    read_data_files(dataset_file)
-    write_positional_output(positional_dict, positional_count_dict, output_pos_dict, output_pos_postings)
-    write_meta_output(meta_dict, output_meta_dict)
+    read_data_files(dataset_file) #build he dictionaries
+    write_positional_output(positional_dict, positional_count_dict, output_pos_dict, output_pos_postings) # output posiional dictionary and postings to files
+    write_meta_output(meta_dict, output_meta_dict) # output metadat dictionary and postings to files
 
     # transform()
     # build_thesaurus()

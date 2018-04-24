@@ -20,8 +20,10 @@ import freetext_retrieval as fr
 
 term_dict = {}
 
+# toggle the metadata usage on and off using this
 zones_metadata_switch = False
 
+# list of all courts and their corresponding relevance values
 court_metadata = {"UK Military Court":0.5, 
                     "NSW Industrial Relations Commission":0.5,
                     "NSW Local Court":0.25, 
@@ -56,6 +58,10 @@ court_metadata = {"UK Military Court":0.5,
 
 
 def get_date_factor(date_string):
+    """
+    This function gives a relevance value for a documents date-posted,
+    assuming more recent documents are more relevant
+    """
     split_string = date_string.split(" ")
     date = split_string[0]
     time = split_string[1]
@@ -68,6 +74,7 @@ def get_date_factor(date_string):
     year = int(year)
     curr_year = int(datetime.now().year)
 
+    # check how many years old the document is
     if(year >= curr_year - 5):
         return 1.5
     elif(year >= curr_year - 10):
@@ -80,15 +87,27 @@ def get_date_factor(date_string):
         return 0.20
 
 def load_dict_file(dict_file):
+    """
+    function to load the word dictionary file
+    """
     with open(dict_file, 'r') as dictionary_f:
         return json.load(dictionary_f)
 
 def load_meta_dict_file(dict_file):
+    """
+    function to load the metadata dictionary file
+    """
     with open(dict_file, 'r') as dictionary_f:
         return json.load(dictionary_f)
 
 def zones_metadata(doc_id_score_list, dictionary):
+    """
+    function to perform update of the scores of the documents and 
+    thus reorder the output. It uses the court name and date posted metadata 
+    to reassign the document scores.
+    """
     res = []
+    # relevance factor for court name and date posted
     court_name_factor = 0.6
     date_factor = 0.4
     for (doc_id, score) in doc_id_score_list:
@@ -140,6 +159,7 @@ def main():
     
     with open(file_of_queries, 'r') as fp:
         query = fp.readlines()
+        
         if "AND" in query[0] or "\"" in query[0][0].strip():
             # call boolean retrieval -> e.g boolRetriev(query.split('AND'))
             res = br.bool_retrieve(query[0].split("AND"), term_dictionary, fp_postings)
