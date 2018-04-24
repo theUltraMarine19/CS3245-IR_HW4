@@ -4,7 +4,7 @@ import sys
 import getopt
 import json
 import math
-import os
+
 import numpy as np
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.stem.porter import PorterStemmer
@@ -45,7 +45,7 @@ csv.field_size_limit(sys.maxsize)
 # -i dataset.csv -d posdict.txt -p pospostings.txt
 # -i output/ -d posdict.txt -p pospostings.txt
 
-output_meta_dict = "metadict.txt"
+output_meta_dict = "tmpmetadict.txt"
 
 def usage():
     print "usage: " + sys.argv[0] + " -i dataset_file -d postional-dictionary-file -p positional-postings-file"
@@ -87,7 +87,7 @@ def read_data_files_test(input_dir):
         for index, row in enumerate(data_reader):
             if index == 0:
                 continue
-            if index >= 4:
+            if index >= 40:
                 break
             doc_id = row[0]
             print count
@@ -309,6 +309,7 @@ if __name__ == "__main__":
     read_data_files(dataset_file)
     write_positional_output(positional_dict, positional_count_dict, output_pos_dict, output_pos_postings)
     write_meta_output(meta_dict, output_meta_dict)
+
     transform()
     build_thesaurus()
     write_thesaurus('thesaurus.txt')
