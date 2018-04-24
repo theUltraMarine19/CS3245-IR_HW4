@@ -33,12 +33,31 @@ def handle_synonyms(term_list, dictionary, fp_postings):
         synonyms = [ps.stem((re.sub(r'[^a-zA-Z0-9]', '', str(x))).lower()) for x in synonyms]
         synonyms = [x for x in synonyms if x in dictionary]
         if synonyms:
-            for syn in synonyms[:5]:
+            for syn in synonyms[1:5]:
                 if len(all_synonyms) >= 5:
                     return all_synonyms
                 elif syn in dictionary:
                     fp_postings.seek(dictionary[syn]['H'])
                     postings_string = fp_postings.read(dictionary[syn]['T'] - dictionary[syn]['H'])
                     all_synonyms.extend(postings_string.split())
+
+    return all_synonyms
+
+
+def handle_synonyms_unigram(term_list, dictionary, fp_postings):
+    all_synonyms = []
+    for i in term_list:
+        synonyms = get_synonyms(i)
+        synonyms = [ps.stem((re.sub(r'[^a-zA-Z0-9]', '', str(x))).lower()) for x in synonyms]
+        new_term = ps.stem((re.sub(r'[^a-zA-Z0-9]', '', str(i))).lower())
+        synonyms = [x for x in synonyms if x in dictionary]
+        for syn in synonyms:
+            if(syn == new_term):
+                continue
+            else:
+                fp_postings.seek(dictionary[syn]['H'])
+                postings_string = fp_postings.read(dictionary[syn]['T'] - dictionary[syn]['H'])
+                all_synonyms.extend(postings_string.split())
+                break
 
     return all_synonyms

@@ -1,7 +1,7 @@
 import sys
 
 from nltk.stem.porter import PorterStemmer
-from synonyms import handle_synonyms
+from synonyms import handle_synonyms_unigram
 
 ps = PorterStemmer()
 
@@ -97,13 +97,8 @@ def get_postings(term, dictionary, fp_postings):
             fp_postings.seek(dictionary[term1]['H'])
             postings_string = fp_postings.read(dictionary[term1]['T'] - dictionary[term1]['H'])
             postings_list = postings_string.split()
-
-            # Svilen: this is for real data, change 5 to smaller number during tests
-            # syn = handle_synonyms(unstemmed_term_list, dictionary, fp_postings)
-            # postings_list.extend(syn)
-
         else:
-            postings_list = handle_synonyms(unstemmed_term_list, dictionary, fp_postings)
+            postings_list = handle_synonyms_unigram(unstemmed_term_list, dictionary, fp_postings)
 
         postings_list = [doc_id_position_string.split("-") for doc_id_position_string in postings_list]
         postings_list = [(doc_id_position_list[0], len(doc_id_position_list) - 1) for doc_id_position_list in
@@ -116,23 +111,20 @@ def get_postings(term, dictionary, fp_postings):
         term2 = term_list[1]
 
         if term1 in dictionary:
-            if term2 in dictionary:
-                # TODO: if we don't have enough docIDs in postings for a given term, check more synonyms
-                # TODO: since length 2, fist check synonyms for the first word, if not enough docIDs, check synonyms for 2. word
-                # if not in dict 2, call synonyms and check for each of the top synonym if in dict 2
-                # else get postings for term from dictionary 2 from postings.txt
-                # TODO: change to positional indexing
-                # synonyms_word1 = get_synonyms(term_list[0])
-                # synonyms_word2 = get_synonyms(term_list[1])
+            fp_postings.seek(dictionary[term1]['H'])
+            postings1_str = fp_postings.read(dictionary[term1]['T'] - dictionary[term1]['H'])
+        else:
+            postings1_str = handle_synonyms_unigram([unstemmed_term_list[0]], dictionary, fp_postings)
 
-                fp_postings.seek(dictionary[term1]['H'])
-                postings1_str = fp_postings.read(dictionary[term1]['T'] - dictionary[term1]['H'])
-                fp_postings.seek(dictionary[term2]['H'])
-                postings2_str = fp_postings.read(dictionary[term2]['T'] - dictionary[term2]['H'])
-                postings_string = positional_intersect(postings1_str, postings2_str)
+        if term2 in dictionary:
+            fp_postings.seek(dictionary[term2]['H'])
+            postings2_str = fp_postings.read(dictionary[term2]['T'] - dictionary[term2]['H'])
+        else:
+            postings2_str = handle_synonyms_unigram([unstemmed_term_list[1]], dictionary, fp_postings)
 
-                postings_list = list(set([x[0] for x in postings_string]))
-                postings_list = sorted(postings_list)
+        postings_string = positional_intersect(postings1_str, postings2_str)
+        postings_list = list(set([x[0] for x in postings_string]))
+        postings_list = sorted(postings_list)
 
     elif len(term_list) == 3:
 
@@ -141,32 +133,34 @@ def get_postings(term, dictionary, fp_postings):
         term3 = term_list[2]
 
         if term1 in dictionary:
-            if term2 in dictionary:
-                if term3 in dictionary:
-                
-                    # TODO: if we don't have enough docIDs in postings for a given term, check more synonyms
-                    # TODO: since length 3, fist check synonyms for the first word, if not enough docIDs, check synonyms for 2. word etc.
-                    # if not in dict 2, call synonyms and check for each of the top synonym if in dict 2
-                    # else get postings for term from dictionary 2 from postings.txt
-                    fp_postings.seek(dictionary[term1]['H'])
-                    postings1_string = fp_postings.read(dictionary[term1]['T'] - dictionary[term1]['H'])
-                    fp_postings.seek(dictionary[term2]['H'])
-                    postings2_string = fp_postings.read(dictionary[term2]['T'] - dictionary[term2]['H'])
-                    fp_postings.seek(dictionary[term3]['H'])
-                    postings3_string = fp_postings.read(dictionary[term3]['T'] - dictionary[term3]['H'])
-                    postings12_list = positional_intersect(postings1_string, postings2_string)
-                    postings23_list = positional_intersect(postings2_string, postings3_string)
-                    final_postings = []
-                    for tup1 in postings12_list:
-                        for tup2 in postings23_list:
-                            if tup1[0] == tup2[0] and tup1[1][1] == tup2[1][0]:
-                                final_postings.append(tup1[0])
+            fp_postings.seek(dictionary[term1]['H'])
+            postings1_string = fp_postings.read(dictionary[term1]['T'] - dictionary[term1]['H'])
+        else:
+            postings1_string = handle_synonyms_unigram([unstemmed_term_list[0]], dictionary, fp_postings)
 
-                    postings_list = list(set(final_postings))
-                    postings_list = sorted(postings_list)
-                    # OR second approach:
-                    # complicated
-                    # make use of positional indexes for fetching the postings
+        if term2 in dictionary:
+            fp_postings.seek(dictionary[term2]['H'])
+            postings2_string = fp_postings.read(dictionary[term2]['T'] - dictionary[term2]['H'])
+        else:
+            postings2_string = handle_synonyms_unigram([unstemmed_term_list[1]], dictionary, fp_postings)
+
+        if term3 in dictionary:
+            fp_postings.seek(dictionary[term3]['H'])
+            postings3_string = fp_postings.read(dictionary[term3]['T'] - dictionary[term3]['H'])
+        else:
+            postings3_string = handle_synonyms_unigram([unstemmed_term_list[2]], dictionary, fp_postings)
+
+        postings12_list = positional_intersect(postings1_string, postings2_string)
+        postings23_list = positional_intersect(postings2_string, postings3_string)
+        final_postings = []
+        for tup1 in postings12_list:
+            for tup2 in postings23_list:
+                if tup1[0] == tup2[0] and tup1[1][1] == tup2[1][0]:
+                    final_postings.append(tup1[0])
+
+        postings_list = list(set(final_postings))
+        postings_list = sorted(postings_list)
+
     else:
         print "ERROR: phrase contains more than 3 terms"
         sys.exit(2)
