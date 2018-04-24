@@ -23,7 +23,7 @@ def tf_val_for_term(original_term, occurrences, dictionary):
     if term not in dictionary:
         original_term = term
 
-        synonyms = fetch_thesaurus(original_term)
+        # synonyms = fetch_thesaurus(original_term)
         synonyms = get_synonyms(original_term)
         for synonym in synonyms:
             stemmed_synonym = ps.stem(synonym)
@@ -126,7 +126,6 @@ def freetext_retrieve(query, dictionary, fp_postings, flag):
             continue
 
         cur_docs = get_postings(new_term_list, dictionary, fp_postings)
-
         cur_docs = [(int(x[0]), x[1]) for x in cur_docs]
         for (doc, tf) in cur_docs:
             norm = dictionary['DOC_NORM'][str(doc)]

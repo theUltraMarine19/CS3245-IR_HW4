@@ -87,7 +87,7 @@ def read_data_files_test(input_dir):
         for index, row in enumerate(data_reader):
             if index == 0:
                 continue
-            if index >= 40:
+            if index >= 3:
                 break
             doc_id = row[0]
             print count
@@ -142,8 +142,8 @@ def build_positional_index_dict(doc_id, doc_string):
     for sent in sentences:
         words = word_tokenize(sent)
         for word in words:
-            term = re.sub(r'[^a-zA-Z0-9]', '', str(word))
-            term = term.lower()
+            # term = re.sub(r'[^a-zA-Z0-9]', '', str(word))
+            term = word.lower()
 
             cache = stemmer_dict.get(term, None)
             if cache is not None:
@@ -162,15 +162,16 @@ def build_positional_index_dict(doc_id, doc_string):
                 else:
                     positional_dict[term] = {}
                     positional_dict[term][doc_id] = [count]
-            count += 1
 
-            if doc_id in doc_words:
-                if term in doc_words[doc_id]:
-                    doc_words[doc_id][term] += 1
+                count += 1
+
+                if doc_id in doc_words:
+                    if term in doc_words[doc_id]:
+                        doc_words[doc_id][term] += 1
+                    else:
+                        doc_words[doc_id][term] = 1
                 else:
-                    doc_words[doc_id][term] = 1
-            else:
-                doc_words[doc_id] = {term : 1}
+                    doc_words[doc_id] = {term : 1}
 
 def transform():
 
@@ -191,12 +192,10 @@ def build_thesaurus():
             sum[ctr] += doc_words[doc_id][term] ** 2
 
         for term in doc_words[doc_id]:
-            # print doc_words[doc_id][term]
             doc_norm_words[doc_id][term] = doc_words[doc_id][term] / math.sqrt(sum[ctr])
 
         ctr += 1
 
-    # print doc_norm_words
 
     for doc_id in doc_norm_words:
         # print doc_id
@@ -310,6 +309,6 @@ if __name__ == "__main__":
     write_positional_output(positional_dict, positional_count_dict, output_pos_dict, output_pos_postings)
     write_meta_output(meta_dict, output_meta_dict)
 
-    transform()
-    build_thesaurus()
-    write_thesaurus('thesaurus.txt')
+    # transform()
+    # build_thesaurus()
+    # write_thesaurus('thesaurus.txt')
