@@ -90,6 +90,10 @@ def bool_retrieve(query, dictionary, fp_postings):
             result_term_list.append(t)
 
         term_postings = get_postings(result_term_list, dictionary, fp_postings)
+        if len(result_term_list) == 1:
+            term_postings = [x[0] for x in term_postings]
+        
+        print term_postings
 
         if index == 0:
             res = term_postings
