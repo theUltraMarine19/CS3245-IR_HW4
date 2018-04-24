@@ -20,6 +20,7 @@ def tf_val_for_term(term, occurrences, dictionary):
     if term not in dictionary:
         original_term = term
         synonyms = get_synonyms(term)
+        synonyms = fetch_thesaurus(original_term)
         for synonym in synonyms:
             # get the first synonym that exists in dictionary
             if synonym in dictionary:
