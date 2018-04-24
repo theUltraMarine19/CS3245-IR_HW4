@@ -39,7 +39,7 @@ csv.field_size_limit(sys.maxsize)
 # -i dataset.csv -d posdict.txt -p pospostings.txt
 # -i output/ -d posdict.txt -p pospostings.txt
 
-output_meta_dict = "metadict.txt"
+output_meta_dict = "new_metadict.txt"
 
 def usage():
     print "usage: " + sys.argv[0] + " -i dataset_file -d postional-dictionary-file -p positional-postings-file"
@@ -185,8 +185,6 @@ def build_positional_index_dict(doc_id, doc_string):
 #             if term in doc_norm_words[doc_id]:
                 
                 
-
-
 def build_meta_dict(doc_id, title, content, date_posted, court):
     meta_dict['title'][doc_id] = title
     meta_dict['date_posted'][doc_id] = date_posted
