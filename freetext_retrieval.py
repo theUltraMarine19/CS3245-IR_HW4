@@ -23,7 +23,7 @@ def tf_val_for_term(term, occurrences, dictionary):
     # TODO: synonyms, return term
     return log_tf * log_idf, [term]
 
-def get_cosine_similarity(query_vec, norm_doc_vects):
+def get_cosine_similarity(query_vec, norm_doc_vects, flag):
     res_vect = []
     sorted_rel_docs = sorted(norm_doc_vects.keys())
 
@@ -33,7 +33,8 @@ def get_cosine_similarity(query_vec, norm_doc_vects):
         res_vect.append((doc, round(similarity, 15)))
     # python sort method is stable and thus guarantee that docIDs with the same similarities
     # will remain in increasing order since they were inserted in the res_vect list in that order
-    res_vect.sort(key=lambda x: x[1], reverse=True)
+    if (flag == True):
+        res_vect.sort(key=lambda x: x[1], reverse=True)
     return res_vect
 
 
@@ -67,7 +68,7 @@ def get_expanded_query(query_vec, norm_doc_vects, res_vect):
 
 
 # TODO: define getSynonyms as a new file or as a method
-def freetext_retrieve(query, dictionary, fp_postings):
+def freetext_retrieve(query, dictionary, fp_postings, flag):
     """
     The main method for the free text retrieval.
     :param query: a list of query terms
@@ -132,8 +133,7 @@ def freetext_retrieve(query, dictionary, fp_postings):
                     else:
                         norm_doc_vects[doc] = [0]
 
-
-    res_vect = get_cosine_similarity(query_vec, norm_doc_vects)
+    res_vect = get_cosine_similarity(query_vec, norm_doc_vects, flag)
     # expanded_query_vec = get_expanded_query(query_vec, norm_doc_vects, res_vect)
     # res_vect = get_cosine_similarity(expanded_query_vec, norm_doc_vects)
 

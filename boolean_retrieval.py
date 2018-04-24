@@ -1,5 +1,6 @@
 from retrieve_postings import get_postings
 import re
+import freetext_retrieval as fr
 from nltk.stem.porter import PorterStemmer
 
 ps = PorterStemmer()
@@ -89,12 +90,17 @@ def bool_retrieve(query, dictionary, fp_postings):
             t = ps.stem(t.lower())
             result_term_list.append(t)
 
-        term_postings = get_postings(result_term_list, dictionary, fp_postings)
         if len(result_term_list) == 1:
+            term_postings = get_postings(result_term_list, dictionary, fp_postings)
+            term_postings = [x[0] for x in term_postings]
+        else:
+            term_postings = fr.freetext_retrieve(result_term_list, dictionary, fp_postings, False)
             term_postings = [x[0] for x in term_postings]
 
         if index == 0:
             res = term_postings
         else:
             res = merge_lists(res, term_postings)
+
+        print res
     return res

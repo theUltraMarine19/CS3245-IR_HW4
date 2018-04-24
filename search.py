@@ -151,7 +151,7 @@ def main():
                     terms.append(q)
                 elif s:
                     terms.append(s)
-            res = fr.freetext_retrieve(terms, term_dictionary, fp_postings)
+            res = fr.freetext_retrieve(terms, term_dictionary, fp_postings, True)
             # res = zones_metadata(res, metadata_dictionary)
             res = [x[0] for x in res]
 
