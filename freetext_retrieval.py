@@ -55,7 +55,7 @@ def get_cosine_similarity(query_vec, norm_doc_vects, flag):
 
 
 def get_expanded_query(query_vec, norm_doc_vects, res_vect):
-    rf_threshold = 0.3
+    rf_threshold = 0.01
     num_total = len(norm_doc_vects)
     num_relevant = int(math.ceil(rf_threshold * num_total))
     num_irrelevant = num_total - num_relevant
@@ -63,9 +63,9 @@ def get_expanded_query(query_vec, norm_doc_vects, res_vect):
     centroid_irrelevant = [0.0 for i in range(len(query_vec))]
 
     alpha = 1
-    beta = 0.8
+    beta = 0.75
     #TODO modern rocchio uses gamma = 0, check if it's needed
-    gamma = 0.1
+    gamma = 0.15
 
     for i in range(num_relevant):
         doc_id_to_get = res_vect[i][0]
@@ -81,7 +81,7 @@ def get_expanded_query(query_vec, norm_doc_vects, res_vect):
 
     for x, y, z in zip(query_vec, centroid_relevant, centroid_irrelevant):
         a = alpha * x
-        b = 0.0 if num_relevant == 0 else beta * y /num_relevant
+        b = 0.0 if num_relevant == 0 else beta * y / num_relevant
         c = 0.0 if num_irrelevant == 0 else gamma * z / num_irrelevant
         expanded_query_vec.append(a + b + c)
     return expanded_query_vec

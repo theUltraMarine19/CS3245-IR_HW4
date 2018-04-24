@@ -20,7 +20,7 @@ import freetext_retrieval as fr
 
 term_dict = {}
 
-zones_metadata_switch = True
+zones_metadata_switch = False
 
 court_metadata = {"UK Military Court":0.5, 
                     "NSW Industrial Relations Commission":0.5,
@@ -143,6 +143,36 @@ def main():
         if "AND" in query[0] or "\"" in query[0][0].strip():
             # call boolean retrieval -> e.g boolRetriev(query.split('AND'))
             res = br.bool_retrieve(query[0].split("AND"), term_dictionary, fp_postings)
+            query[0] = " ".join(query[0].split("AND"))
+
+            separate_terms = re.findall(r'(?P<q_marks>\"(.*?)\")|(?P<s_word>\w+)', query[0])
+            terms = []
+            for b, q, s in separate_terms:
+                if b:
+                    terms.append(b.replace('"', ''))
+                elif q:
+                    terms.append(q)
+                elif s:
+                    terms.append(s)
+
+            final_term_list = []
+            for ele in terms:
+                if len(ele) > 1:
+                    eles = ele.split()
+                    final_term_list.extend(eles)
+
+            res1 = fr.freetext_retrieve(final_term_list, term_dictionary, fp_postings, True)
+            res1 = [str(x[0]) for x in res1]
+
+            print res
+            print res1
+            for x in res1:
+                if x not in res:
+                    res.append(x)
+
+            # res.extend(res1)
+            # if zones_metadata_switch == True:
+            #     res1 = zones_metadata(res1, metadata_dictionary)
 
         else:
             # call freetext retrieval -> e.g freetextRetriev(query.split(' '))
@@ -165,7 +195,6 @@ def main():
         out_str = str()
         out_str += ' '.join(str(el) for el in res) + '\n'
         out.write(out_str[:-1])  # removes the last '\n'
-
 
 if __name__ == "__main__":
     main()

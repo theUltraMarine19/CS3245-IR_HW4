@@ -6,13 +6,25 @@ We're using Python Version 2.7.12 for this assignment.
 
 == General Notes about this assignment ==
 
-Indexing phase:
+Index phase:
 
+We build a positional dictionary and its postings. In addition, we also create a metadata dictionary and a thesaurus, which are both used in the search phase.
 
 Search phase:
 
+- Boolean retrieval:
+For phrases, we use positional dictionary to retrieve only documents that contain the exact phrase. This is done by intersecting the positions of each term in the phrase.
+For instance, `"information retrieval" AND index` will only However, this will not cover cases where
+
+- Freetext retrieval:
+
+
+
 Query expansions:
-- WordNet
+
+- Synonyms: WordNet
+- Synonyms: Thesaurus
+- Pseudo Relevance Feedback: Rocchio formula
 
 Optimizations:
 
@@ -40,10 +52,12 @@ retrieve_postings.py
 This module contains the methods for handling synonyms and retrieving the postings for a given term or its synonyms.
 
 synonyms.py
-This module uses wordnet to return synonyms and the postings of the synonyms for a given term.
+This module uses wordnet to return synonyms and their postings for a given term.
 
 thesaurus.py
-This module builds a co-occurrence matrix out from the term document matrix, 
+This module builds a co-occurrence matrix out from the term document matrix, which is built during index itself, based
+on the terms from the corpus, and for any given term, it gives us the list of the most similar terms in the corpus
+(using the term document similarity weights).
 
 dictionary.txt
 The dictionary with terms and their head, tail and document frequency.
