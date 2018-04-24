@@ -17,7 +17,7 @@ def tf_val_for_term(original_term, occurrences, dictionary):
     :param original_term:
     :param occurrences:
     :param dictionary:
-    :return: the (?normalized) vector for the term,
+    :return: the tf*itf for the term
     """
     term = ps.stem(original_term)
     if term not in dictionary:
@@ -40,6 +40,11 @@ def tf_val_for_term(original_term, occurrences, dictionary):
 
 
 def get_cosine_similarity(query_vec, norm_doc_vects, flag):
+    """
+    compute the cosine similarity between query_Vec and each document
+    and return the document id's and their score pairs in sorted order
+    of score if flag is true.
+    """
     res_vect = []
     sorted_rel_docs = sorted(norm_doc_vects.keys())
 
@@ -55,6 +60,9 @@ def get_cosine_similarity(query_vec, norm_doc_vects, flag):
 
 
 def get_expanded_query(query_vec, norm_doc_vects, res_vect):
+    """
+    method to expand the query using rocchio formula.
+    """
     rf_threshold = 0.3
     num_total = len(norm_doc_vects)
     num_relevant = int(math.ceil(rf_threshold * num_total))
@@ -66,12 +74,14 @@ def get_expanded_query(query_vec, norm_doc_vects, res_vect):
     beta = 0.8
     #TODO modern rocchio uses gamma = 0, check if it's needed
     gamma = 0.1
-
+    
+    # compute centroid of relevant documents
     for i in range(num_relevant):
         doc_id_to_get = res_vect[i][0]
         doc_vec = norm_doc_vects[doc_id_to_get]
         centroid_relevant = [x + y for x, y in zip(centroid_relevant, doc_vec)]
-
+        
+    # compute centroid of irrelevant documents
     for i in range(num_relevant, num_total):
         doc_id_to_get = res_vect[i][0]
         doc_vec = norm_doc_vects[doc_id_to_get]
@@ -155,10 +165,12 @@ def freetext_retrieve(query, dictionary, fp_postings, flag):
                         norm_doc_vects[doc].append(0)
                     else:
                         norm_doc_vects[doc] = [0]
-
+                        
+    # check if rocchio flag is turned on
     if not rocchio:
         res_vect = get_cosine_similarity(query_vec, norm_doc_vects, flag)
     else:
+        # if on, first get expanded query and then do cosine similarity calculation again
         res_vect = get_cosine_similarity(query_vec, norm_doc_vects, True)
         expanded_query_vec = get_expanded_query(query_vec, norm_doc_vects, res_vect)
         res_vect = get_cosine_similarity(expanded_query_vec, norm_doc_vects, flag)
