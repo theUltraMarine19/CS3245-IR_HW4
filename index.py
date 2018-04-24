@@ -5,9 +5,10 @@ import getopt
 import json
 import math
 import os
-import numpy
+import numpy as np
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.stem.porter import PorterStemmer
+from nltk.corpus import stopwords
 
 reload(sys)
 sys.setdefaultencoding('ISO-8859-1')
@@ -22,6 +23,8 @@ positional_dict = {}
 positional_count_dict = {}
 meta_dict = {"title":{}, "date_posted":{}, "court":{}}
 stemmer_dict = {}
+thesaurus = {}
+positional_list = []
 
 all_doc_ids = []
 ps = PorterStemmer()
@@ -29,6 +32,9 @@ ps = PorterStemmer()
 doc_words = {}
 doc_norm_words = {}
 doc_matrix = []
+SIM_BOUND = 8
+THRESHOLD = 6
+stop = set(stopwords.words('english'))
 
 # the size of the training data set
 collection_size = 0
@@ -81,7 +87,7 @@ def read_data_files_test(input_dir):
         for index, row in enumerate(data_reader):
             if index == 0:
                 continue
-            if index >= 2:
+            if index >= 4:
                 break
             doc_id = row[0]
             print count
@@ -166,26 +172,65 @@ def build_positional_index_dict(doc_id, doc_string):
             else:
                 doc_words[doc_id] = {term : 1}
 
-# def build_thesaurus():
+def transform():
 
-#     sum = [0.0] * len(doc_words)
-#     ctr = 0
-#     for doc_id in doc_words:
+    # counter = 0
+    for term in positional_dict:
+        positional_list.append(term)
+        # counter += 1
+
+def build_thesaurus():
+
+    sum = [0.0] * len(doc_words)
+    ctr = 0
+
+    for doc_id in doc_words:
         
-#         for term in doc_words[doc_id]:
-#             sum[ctr] += doc_words[doc_id][term] ** 2
+        doc_norm_words[doc_id] = {}
+        for term in doc_words[doc_id]:
+            sum[ctr] += doc_words[doc_id][term] ** 2
 
-#         for term in doc_words[doc_id]:
-#             doc_norm_words[doc_id][term] = doc_words[doc_id][term] / sqrt(sum[ctr])
+        for term in doc_words[doc_id]:
+            # print doc_words[doc_id][term]
+            doc_norm_words[doc_id][term] = doc_words[doc_id][term] / math.sqrt(sum[ctr])
 
-#         ctr += 1
+        ctr += 1
 
-#     for doc_id in doc_norm_words:
-#         for term in positional_dict:
-#             if term in doc_norm_words[doc_id]:
-                
-                
+    # print doc_norm_words
 
+    for doc_id in doc_norm_words:
+        # print doc_id
+        tmp = []
+        for term in positional_dict:
+            if term in doc_norm_words[doc_id]:
+                tmp.append(doc_norm_words[doc_id][term])
+            else:
+                tmp.append(0.0)
+        doc_matrix.append(tmp)
+
+    doc_mat = np.matrix(doc_matrix)
+    # print doc_mat
+    doc_mat_transpose = doc_mat.transpose()
+    co_occurence_mat = np.matmul(doc_mat_transpose, doc_mat)
+    # print co_occurence_mat
+    # print doc_mat_transpose.shape, doc_mat.shape
+
+    for i in range(len(positional_dict)):
+        # if (i <= 2):
+        #     print positional_list[i]
+            # print co_occurence_mat[i].tolist()[0]
+        sim_list = sorted(enumerate(co_occurence_mat[i].tolist()[0]), key = lambda x : -x[1])
+        # if (i <= 2):
+        #     print sim_list[1:50]
+        sim_terms = [positional_list[k[0]] for k in sim_list]
+        # if (i <= 2):
+        #     print sim_terms[1:50]
+        sim_terms = [term for term in sim_terms if term not in stop]
+        thesaurus[positional_list[i]] = sim_terms[1 : SIM_BOUND]
+
+def write_thesaurus(thes_out_file):
+    with open(thes_out_file, 'w') as thes_out_dict:
+        json.dump(thesaurus, thes_out_dict)
 
 def build_meta_dict(doc_id, title, content, date_posted, court):
     meta_dict['title'][doc_id] = title
@@ -264,3 +309,6 @@ if __name__ == "__main__":
     read_data_files(dataset_file)
     write_positional_output(positional_dict, positional_count_dict, output_pos_dict, output_pos_postings)
     write_meta_output(meta_dict, output_meta_dict)
+    transform()
+    build_thesaurus()
+    write_thesaurus('thesaurus.txt')
