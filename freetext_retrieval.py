@@ -3,6 +3,7 @@ from retrieve_postings import get_postings
 from nltk.stem.porter import PorterStemmer
 import math
 from operator import mul
+from synonyms import get_synonyms
 
 ps = PorterStemmer()
 
@@ -17,11 +18,19 @@ def tf_val_for_term(term, occurrences, dictionary):
     :return: the (?normalized) vector for the term,
     """
     if term not in dictionary:
-        #TODO: chenage to synonyms
-        return (0, None)
+        original_term = term
+        synonyms = get_synonyms(term)
+        for synonym in synonyms:
+            # get the first synonym that exists in dictionary
+            if synonym in dictionary:
+                term = synonym
+                break
+        # all synonyms don't exist in dictionary
+        if original_term == term:
+            return (0, None)
+
     log_tf = 1.0 + math.log10(occurrences) if occurrences != 0 else 0.0
     log_idf = math.log10(float(dictionary['N'])/float(dictionary[term]['F']))
-    # TODO: synonyms, return term
     return log_tf * log_idf, [term]
 
 

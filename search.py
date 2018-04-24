@@ -2,7 +2,7 @@ import json
 import sys
 import getopt
 import re
-import datetime
+from datetime import datetime
 
 import boolean_retrieval as br
 import freetext_retrieval as fr
@@ -20,27 +20,29 @@ import freetext_retrieval as fr
 
 term_dict = {}
 
+zones_metadata_switch = True
+
 court_metadata = {"UK Military Court":0.5, 
                     "NSW Industrial Relations Commission":0.5,
                     "NSW Local Court":0.25, 
                     "UK House of Lords":1.0, 
                     "NSW Court of Criminal Appeal":0.75, 
-                    "NSW Supreme Court":1.0,
+                    "NSW Supreme Court":1.5,
                     "NSW Land and Environment Court":0.5,
                     "Industrial Relations Court of Australia":0.25,
-                    "NSW Court of Appeal":0.75, 
+                    "NSW Court of Appeal":0.6, 
                     "SG Family Court":0.5,
-                    "SG Privy Council":0.25, 
+                    "SG Privy Council":0.2, 
                     "NSW District Court":0.5,
-                    "NSW Administrative Decisions Tribunal (Trial)":0.25, 
-                    "NSW Industrial Court":0.25, 
-                    "High Court of Australia":0.75,
-                    "Singapore International Commercial Court":0.75, 
+                    "NSW Administrative Decisions Tribunal (Trial)":0.2, 
+                    "NSW Industrial Court":0.2, 
+                    "High Court of Australia":0.8,
+                    "Singapore International Commercial Court":0.7, 
                     "CA Supreme Court":1.0, 
                     "SG High Court": 0.75, 
                     "SG District Court":0.5, 
                     "NSW Children's Court":0.5, 
-                    "UK Supreme Court": 1.0, 
+                    "UK Supreme Court": 1.5, 
                     "SG Magistrates' Court": 0.5,
                     "UK High Court": 0.75, 
                     "HK High Court": 0.75, 
@@ -49,8 +51,8 @@ court_metadata = {"UK Military Court":0.5,
                     "HK Court of First Instance": 0.5,
                     "UK Court of Appeal": 1.0,
                     "NSW Civil and Administrative Tribunal": 0.25,
-                    "SG Court of Appeal": 1.0, 
-                    "UK Crown Court": 0.75}
+                    "SG Court of Appeal": 0.8, 
+                    "UK Crown Court": 0.7}
 
 
 def get_date_factor(date_string):
@@ -61,19 +63,21 @@ def get_date_factor(date_string):
     date = date.split("-")
     year = date[0]
     month = date[1]
-    day = date[3]
+    day = date[2]
 
     year = int(year)
     curr_year = int(datetime.now().year)
 
-    if(year >= curr_year - 10):
+    if(year >= curr_year - 5):
+        return 1.5
+    elif(year >= curr_year - 10):
         return 1.0
     elif(year >= curr_year - 20):
-        return 0.75
+        return 0.65
     elif(year >= curr_year - 40):
-        return 0.50
+        return 0.40
     else:
-        0.25
+        return 0.20
 
 def load_dict_file(dict_file):
     with open(dict_file, 'r') as dictionary_f:
@@ -85,18 +89,19 @@ def load_meta_dict_file(dict_file):
 
 def zones_metadata(doc_id_score_list, dictionary):
     res = []
-    court_name_factor = 0.8
-    date_factor = 0.2
+    court_name_factor = 0.6
+    date_factor = 0.4
     for (doc_id, score) in doc_id_score_list:
-        court_name = dictionary['court'][doc_id]
+        court_name = dictionary['court'][str(doc_id)]
         court_score = court_metadata.get(court_name, 0)
 
-        date = dictionary['date_posted'][doc_id]
+        date = dictionary['date_posted'][str(doc_id)]
         date_score = get_date_factor(date)
 
         final_score_factor = court_name_factor*court_score + date_factor*date_score
 
         res.append((doc_id, score*final_score_factor))
+    res.sort(key=lambda x: x[1], reverse=True)
     return res
 
 def usage():
@@ -131,7 +136,7 @@ def main():
     fp_postings = open(postings_file, 'r')
     term_dictionary = load_dict_file(dictionary_file)
 
-    # metadata_dictionary = load_meta_dict_file("metadict.txt")
+    metadata_dictionary = load_meta_dict_file("metadict.txt")
     
     with open(file_of_queries, 'r') as fp:
         query = fp.readlines()
@@ -150,7 +155,8 @@ def main():
                 elif s:
                     terms.append(s)
             res = fr.freetext_retrieve(terms, term_dictionary, fp_postings)
-            # res = zones_metadata(res, metadata_dictionary)
+            if(zones_metadata_switch == True):
+                res = zones_metadata(res, metadata_dictionary)
             res = [x[0] for x in res]
 
     with open(file_of_output, 'w') as out:

@@ -1,28 +1,9 @@
 import sys
-from nltk.corpus import wordnet
 
+from nltk.stem.porter import PorterStemmer
+from synonyms import handle_synonyms
 
-def get_synonyms(term):
-    """
-    This method returns the synonyms of a given term
-    :param term: a single word
-    :return: all synonyms of the term
-    """
-    term_list = term.split()
-    if len(term_list) > 1:
-        print "ERROR: Passing more than one word to gen_synonyms"
-        return -1
-
-    # get synonyms
-    syns_word = wordnet.synsets(term)
-    synonyms = []
-    for syn in syns_word:
-        for l in syn.lemmas():
-            # TODO: Check if that's fine
-            if l.name() not in synonyms:
-                synonyms.append(l.name())
-
-    return synonyms
+ps = PorterStemmer()
 
 
 def positional_intersect(l1, l2):
@@ -51,7 +32,6 @@ def positional_intersect(l1, l2):
         l1_doc_id = pl1pos[0]
         l2_doc_id = pl2pos[0]
 
-        # print l1_doc_id, l2_doc_id
         if l1_doc_id == l2_doc_id:
 
             # pos_ans = []
@@ -100,34 +80,43 @@ def get_postings(term, dictionary, fp_postings):
     :param fp_postings:
     :return: postings for the given term
     """
-    # print term
     postings_list = []
     if type(term) != list:
-        term_list = term.split()
+        unstemmed_term_list = term.split()
     else:
-        term_list = term
-    # TODO: term is still a string make sure it's a list or check for word count
+        unstemmed_term_list = term
+    term_list = [ps.stem(x) for x in unstemmed_term_list]
+
     if len(term_list) == 1:
-        # check if its a single word
-        # check if term in dictionary 1
-        if term_list[0] in dictionary:
+        term1 = term_list[0]
+        if term1 in dictionary:
             # TODO: if we don't have enough docIDs in postings for a given term, check more synonyms
             # if not in dict 1, call synonyms and check for each of the top synonym if in dict 1
             # else get postings for term from dictionary 1 from postings.txt
 
-            fp_postings.seek(dictionary[term_list[0]]['H'])
-            postings_string = fp_postings.read(dictionary[term_list[0]]['T'] - dictionary[term_list[0]]['H'])
+            fp_postings.seek(dictionary[term1]['H'])
+            postings_string = fp_postings.read(dictionary[term1]['T'] - dictionary[term1]['H'])
             postings_list = postings_string.split()
-            postings_list = [doc_id_position_string.split("-") for doc_id_position_string in postings_list]
-            postings_list = [(doc_id_position_list[0], len(doc_id_position_list) - 1) for doc_id_position_list in
-                             postings_list]
-            # return postings_list
+
+            # Svilen: this is for real data, change 5 to smaller number during tests
+            # syn = handle_synonyms(unstemmed_term_list, dictionary, fp_postings)
+            # postings_list.extend(syn)
+
+        else:
+            postings_list = handle_synonyms(unstemmed_term_list, dictionary, fp_postings)
+
+        postings_list = [doc_id_position_string.split("-") for doc_id_position_string in postings_list]
+        postings_list = [(doc_id_position_list[0], len(doc_id_position_list) - 1) for doc_id_position_list in
+                         postings_list]
 
     elif len(term_list) == 2:
         # for terms of length 2, use the format of double indexing in dict'
         # check if term in dictionary 2
-        if term_list[0] in dictionary:
-            if term_list[1] in dictionary:
+        term1 = term_list[0]
+        term2 = term_list[1]
+
+        if term1 in dictionary:
+            if term2 in dictionary:
                 # TODO: if we don't have enough docIDs in postings for a given term, check more synonyms
                 # TODO: since length 2, fist check synonyms for the first word, if not enough docIDs, check synonyms for 2. word
                 # if not in dict 2, call synonyms and check for each of the top synonym if in dict 2
@@ -136,32 +125,36 @@ def get_postings(term, dictionary, fp_postings):
                 # synonyms_word1 = get_synonyms(term_list[0])
                 # synonyms_word2 = get_synonyms(term_list[1])
 
-                fp_postings.seek(dictionary[term[0]]['H'])
-                postings1_str = fp_postings.read(dictionary[term[0]]['T'] - dictionary[term[0]]['H'])
-                fp_postings.seek(dictionary[term[1]]['H'])
-                postings2_str = fp_postings.read(dictionary[term[1]]['T'] - dictionary[term[0]]['H'])
+                fp_postings.seek(dictionary[term1]['H'])
+                postings1_str = fp_postings.read(dictionary[term1]['T'] - dictionary[term1]['H'])
+                fp_postings.seek(dictionary[term2]['H'])
+                postings2_str = fp_postings.read(dictionary[term2]['T'] - dictionary[term2]['H'])
                 postings_string = positional_intersect(postings1_str, postings2_str)
-                # print postings_string
+
                 postings_list = list(set([x[0] for x in postings_string]))
                 postings_list = sorted(postings_list)
 
     elif len(term_list) == 3:
-        if term_list[0] in dictionary:
-            if term_list[1] in dictionary:
-                if term_list[2] in dictionary:
+
+        term1 = term_list[0]
+        term2 = term_list[1]
+        term3 = term_list[2]
+
+        if term1 in dictionary:
+            if term2 in dictionary:
+                if term3 in dictionary:
                 
                     # TODO: if we don't have enough docIDs in postings for a given term, check more synonyms
                     # TODO: since length 3, fist check synonyms for the first word, if not enough docIDs, check synonyms for 2. word etc.
                     # if not in dict 2, call synonyms and check for each of the top synonym if in dict 2
                     # else get postings for term from dictionary 2 from postings.txt
-                    fp_postings.seek(dictionary[term[0]]['H'])
-                    postings1_string = fp_postings.read(dictionary[term[0]]['T'] - dictionary[term[0]]['H'])
-                    fp_postings.seek(dictionary[term[1]]['H'])
-                    postings2_string = fp_postings.read(dictionary[term[1]]['T'] - dictionary[term[1]]['H'])
-                    fp_postings.seek(dictionary[term[2]]['H'])
-                    postings3_string = fp_postings.read(dictionary[term[2]]['T'] - dictionary[term[2]]['H'])
+                    fp_postings.seek(dictionary[term1]['H'])
+                    postings1_string = fp_postings.read(dictionary[term1]['T'] - dictionary[term1]['H'])
+                    fp_postings.seek(dictionary[term2]['H'])
+                    postings2_string = fp_postings.read(dictionary[term2]['T'] - dictionary[term2]['H'])
+                    fp_postings.seek(dictionary[term3]['H'])
+                    postings3_string = fp_postings.read(dictionary[term3]['T'] - dictionary[term3]['H'])
                     postings12_list = positional_intersect(postings1_string, postings2_string)
-                    # print postings12_list
                     postings23_list = positional_intersect(postings2_string, postings3_string)
                     final_postings = []
                     for tup1 in postings12_list:
@@ -170,8 +163,7 @@ def get_postings(term, dictionary, fp_postings):
                                 final_postings.append(tup1[0])
 
                     postings_list = list(set(final_postings))
-                    postings_list = sorted(postings_list)    
-                    # print final_postings        
+                    postings_list = sorted(postings_list)
                     # OR second approach:
                     # complicated
                     # make use of positional indexes for fetching the postings
@@ -180,18 +172,15 @@ def get_postings(term, dictionary, fp_postings):
         sys.exit(2)
     # if successfully reaches here without error, return fetched postings list
 
-    # print postings_list
     postings_list_tuple = []
     for e in postings_list:
         # e_list = e.split('-')
         # tf = len(e_list) - 1
         # if boolean retrieval is called with phrase, then add positional indexing at the end
-        if (type(e) == tuple):
+        if type(e) == tuple:
             postings_list_tuple.append((e[0], e[1]))
         else:
             postings_list_tuple.append((e, -1))
 
     # print postings_list_tuple
     return postings_list_tuple
-
-
