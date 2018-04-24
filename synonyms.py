@@ -45,7 +45,7 @@ def handle_synonyms(term_list, dictionary, fp_postings):
 
 
 def handle_synonyms_unigram(term_list, dictionary, fp_postings):
-    all_synonyms = []
+    all_synonyms = ''
     for i in term_list:
         synonyms = get_synonyms(i)
         synonyms = [ps.stem((re.sub(r'[^a-zA-Z0-9]', '', str(x))).lower()) for x in synonyms]
@@ -57,7 +57,6 @@ def handle_synonyms_unigram(term_list, dictionary, fp_postings):
             else:
                 fp_postings.seek(dictionary[syn]['H'])
                 postings_string = fp_postings.read(dictionary[syn]['T'] - dictionary[syn]['H'])
-                all_synonyms.extend(postings_string.split())
+                all_synonyms += ' ' + postings_string
                 break
-
-    return all_synonyms
+    return all_synonyms.strip()

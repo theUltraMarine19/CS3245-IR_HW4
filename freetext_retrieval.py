@@ -123,6 +123,7 @@ def freetext_retrieve(query, dictionary, fp_postings, flag):
             continue
 
         cur_docs = get_postings(new_term_list, dictionary, fp_postings)
+
         cur_docs = [(int(x[0]), x[1]) for x in cur_docs]
         for (doc, tf) in cur_docs:
             norm = dictionary['DOC_NORM'][str(doc)]

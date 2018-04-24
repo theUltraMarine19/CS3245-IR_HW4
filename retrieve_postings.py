@@ -80,7 +80,6 @@ def get_postings(term, dictionary, fp_postings):
     :param fp_postings:
     :return: postings for the given term
     """
-    postings_list = []
     if type(term) != list:
         unstemmed_term_list = term.split()
     else:
@@ -90,15 +89,13 @@ def get_postings(term, dictionary, fp_postings):
     if len(term_list) == 1:
         term1 = term_list[0]
         if term1 in dictionary:
-            # TODO: if we don't have enough docIDs in postings for a given term, check more synonyms
             # if not in dict 1, call synonyms and check for each of the top synonym if in dict 1
             # else get postings for term from dictionary 1 from postings.txt
-
             fp_postings.seek(dictionary[term1]['H'])
             postings_string = fp_postings.read(dictionary[term1]['T'] - dictionary[term1]['H'])
             postings_list = postings_string.split()
         else:
-            postings_list = handle_synonyms_unigram(unstemmed_term_list, dictionary, fp_postings)
+            postings_list = handle_synonyms_unigram(unstemmed_term_list, dictionary, fp_postings).split()
 
         postings_list = [doc_id_position_string.split("-") for doc_id_position_string in postings_list]
         postings_list = [(doc_id_position_list[0], len(doc_id_position_list) - 1) for doc_id_position_list in
