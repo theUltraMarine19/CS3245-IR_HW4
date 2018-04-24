@@ -142,8 +142,8 @@ def build_positional_index_dict(doc_id, doc_string):
     for sent in sentences:
         words = word_tokenize(sent)
         for word in words:
-            # term = re.sub(r'[^a-zA-Z0-9]', '', str(word))
-            term = word.lower()
+            term = re.sub(r'[^a-zA-Z0-9]', '', str(word))
+            term = term.lower()
 
             cache = stemmer_dict.get(term, None)
             if cache is not None:

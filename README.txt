@@ -39,11 +39,17 @@ Handle free text queries that using tf-idf as in assignment 3.
 retrieve_postings.py
 This module contains the methods for handling synonyms and retrieving the postings for a given term or its synonyms.
 
+synonyms.py
+This module uses wordnet to return synonyms and the postings of the synonyms for a given term.
+
+thesaurus.py
+This module builds a co-occurrence matrix out from the term document matrix, 
+
 dictionary.txt
 The dictionary with terms and their head, tail and document frequency.
 
 postings.txt
-The postings for all terms in the dictionary and their term frequency in the respective document.
+The positional postings for all terms in the dictionary. It includes their positions in the respective document.
 
 README.txt
 The description of our approach and other important notes.
@@ -59,7 +65,7 @@ printed) from the discussions.
 Emails: e0268461@u.nus.edu
 	e0268631@u.nus.edu
 	e0268734@u.nus.edu
-	e0268631@u.nus.edu
+	e0215813@u.nus.edu
 	
 
 == References ==
