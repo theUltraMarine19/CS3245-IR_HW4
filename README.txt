@@ -91,6 +91,20 @@ OTHER EXPERIMENTS:
 The two copies of the documents with these document id's had the same content but different court names in most cases. This duplication of data while not a major roadblock, was affecting our term freqeuncy and document normlization calculations by a small value.
 
 
+ORIGINAL IDEAS
+-> In dealing with boolean queries, we used the unique idea of first printing the output of the boolean query as we did in HW2 and then converting the entire query to fully freetext and then outputting it's output. This helped to significantly improve our score on the leaderboard.
+
+-> We used several query expansion ideas like metadata, rocchio, thesaurus and wordnet for synonyms.
+
+-> We used the stemming optimization to remedy the bottleneck and speed up indexing.
+
+
+
+DISTRIBUTION OF WORK
+A0179092W ->
+A0175111U -> 
+A0179365N ->
+A0179262X -> building dictionary and postings, metadata zones and fields implementation, free text retrieval in search
 
 == Files included with this submission ==
 
