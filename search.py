@@ -100,6 +100,13 @@ def load_meta_dict_file(dict_file):
     with open(dict_file, 'r') as dictionary_f:
         return json.load(dictionary_f)
 
+def load_thesaurus(dict_file):
+    """
+    function to load the thesaurus file
+    """
+    with open(dict_file, 'r') as thesau_f:
+        return json.load(thesau_f)
+
 def zones_metadata(doc_id_score_list, dictionary):
     """
     function to perform update of the scores of the documents and 
@@ -154,8 +161,8 @@ if dictionary_file is None or postings_file is None or file_of_queries is None o
 def main():
     fp_postings = open(postings_file, 'r')
     term_dictionary = load_dict_file(dictionary_file)
-
     metadata_dictionary = load_meta_dict_file("metadict.txt")
+    thesaurus = load_thesaurus('thesaurus.txt')
     
     with open(file_of_queries, 'r') as fp:
         query = fp.readlines()
@@ -181,7 +188,7 @@ def main():
                     eles = ele.split()
                     final_term_list.extend(eles)
 
-            res1 = fr.freetext_retrieve(final_term_list, term_dictionary, fp_postings, True)
+            res1 = fr.freetext_retrieve(final_term_list, term_dictionary, thesaurus, fp_postings, True)
             res1 = [str(x[0]) for x in res1]
 
             for x in res1:
@@ -204,7 +211,7 @@ def main():
                 elif s:
                     terms.append(s)
 
-            res = fr.freetext_retrieve(terms, term_dictionary, fp_postings, True)
+            res = fr.freetext_retrieve(terms, term_dictionary, thesaurus, fp_postings, True)
             if zones_metadata_switch == True:
                 res = zones_metadata(res, metadata_dictionary)
             res = [x[0] for x in res]

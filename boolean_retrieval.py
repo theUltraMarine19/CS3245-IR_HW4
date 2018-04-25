@@ -2,7 +2,6 @@ from retrieve_postings import get_postings
 import re
 from nltk.stem.porter import PorterStemmer
 
-# ps = PorterStemmer()
 
 def merge_lists(l1, l2):
     """

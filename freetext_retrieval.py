@@ -7,7 +7,11 @@ from synonyms import get_synonyms
 
 ps = PorterStemmer()
 
+
 rocchio = False
+
+# toggle thesaurus usage on and off using this
+thesaurus_switch = False
 
 
 def tf_val_for_term(original_term, occurrences, dictionary):
@@ -21,9 +25,7 @@ def tf_val_for_term(original_term, occurrences, dictionary):
     """
     term = ps.stem(original_term)
     if term not in dictionary:
-        original_term = term
-
-        # synonyms = fetch_thesaurus(original_term)
+        stemmed_term = term
         synonyms = get_synonyms(original_term)
         for synonym in synonyms:
             stemmed_synonym = ps.stem(synonym)
@@ -32,8 +34,9 @@ def tf_val_for_term(original_term, occurrences, dictionary):
                 term = stemmed_synonym
                 break
         # all synonyms don't exist in dictionary
-        if original_term == term:
+        if stemmed_term == term:
             return (0, None)
+
     log_tf = 1.0 + math.log10(occurrences) if occurrences != 0 else 0.0
     log_idf = math.log10(float(dictionary['N'])/float(dictionary[term]['F']))
     return log_tf * log_idf, [term]
@@ -54,7 +57,7 @@ def get_cosine_similarity(query_vec, norm_doc_vects, flag):
         res_vect.append((doc, round(similarity, 15)))
     # python sort method is stable and thus guarantee that docIDs with the same similarities
     # will remain in increasing order since they were inserted in the res_vect list in that order
-    if (flag == True):
+    if flag == True:
         res_vect.sort(key=lambda x: x[1], reverse=True)
     return res_vect
 
@@ -72,7 +75,6 @@ def get_expanded_query(query_vec, norm_doc_vects, res_vect):
 
     alpha = 1
     beta = 0.75
-    #TODO modern rocchio uses gamma = 0, check if it's needed
     gamma = 0.15
     
     # compute centroid of relevant documents
@@ -97,12 +99,12 @@ def get_expanded_query(query_vec, norm_doc_vects, res_vect):
     return expanded_query_vec
 
 
-# TODO: define getSynonyms as a new file or as a method
-def freetext_retrieve(query, dictionary, fp_postings, flag):
+def freetext_retrieve(query, dictionary, thesaurus, fp_postings, flag):
     """
     The main method for the free text retrieval.
     :param query: a list of query terms
     :param dictionary:
+    :param thesaurus:
     :param fp_postings:
     :return: return the result of all relevant docIDs in decreasing order of priority using a heap (heapq module)
     """
@@ -112,10 +114,19 @@ def freetext_retrieve(query, dictionary, fp_postings, flag):
     for term in query:
         original_term = term
         term = re.sub(r'[^a-zA-Z0-9]', '', str(term))
-        term = term.lower()
+        term = ps.stem(term.lower())
         if term not in stemmed_query_dict:
             stemmed_query_dict[term] = []
         stemmed_query_dict[term].append(original_term)
+
+        if thesaurus_switch == True:
+            if term in thesaurus:
+                thesaurus_list = thesaurus[term]
+                # add each t in thesaurus list to the stemmed_query_dict
+                for t in thesaurus_list:
+                    if t not in stemmed_query_dict:
+                        stemmed_query_dict[t] = []
+                    stemmed_query_dict[t].append(t)
     # remove words appearing more than once because we count them in the t_f computation below
     stemmed_query_list = stemmed_query_dict.keys()
 
