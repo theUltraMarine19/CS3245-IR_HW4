@@ -39,12 +39,14 @@ ZONES AND FIELDS
 
 QUERY EXPANSION TECHNIQUES
 
+We have a provided a detailed analysis of using these query expansion techniques on results in bonus.txt
+
 1) Synonyms : WordNet-Query expansions:
--> In case any term in the query isn’t in the dictionary, we find a synonym for it from the WordNet synonyms list which is there in our dictionary and use that to replace that term in the dictionary.
+-> In case any term in the query isn’t in the dictionary, we find a synonym for it from the WordNet synonyms list which is there in our dictionary and use that to replace that term in the query.
 
 
 2) Synonyms : Thesaurus
--> 
+-> The index phase also generates a thesaurus from the words in the corpus, and gives us a list of all terms in corpus, which are similar to a given term. This can be used to either expand the query with additional related terms, which increases recall, or substitute terms. This helps us change the query vector for retrieving more relevant documents. 
 
 
 3) Pseudo Relevance Feedback : Rocchio formula
@@ -59,7 +61,7 @@ gamma = 0.15
 
 OPTIMIZATIONS:
 -> Stemming optimization
-We observed that indexing was taking too long (1 hour or so). We discovered that stemming was the bottleneck for slowing down the indexing phase. Because we can’t control the library operations for stemming, we decided to do local caching to speed up the stemming. For each new word encountered, we store the original word as the key and its stemmed counterpart as the value in a locally cache dictionary.So the next time, before we attempt to stem a word, we first check if the word already has it’s stem present in the cache before calling the library stem function. This halved the indexing time for us.
+We observed that indexing was taking too long (about 1 hour or so). We discovered that stemming was the bottleneck for slowing down the indexing phase. Because we don’t have control over the library operations for stemming, we decided to do local caching of stem words for speed up. For each new word that we get, we store the original word as key and its stemmed value as value in a locally cached dictionary. So next time, before we attempt to stem a word, we first check if the word already has its stem present in the cache before calling the library stem function. This halved the indexing time for us, and we were able to index in about 25~28 minutes now.
  
 
 OTHER EXPERIMENTS:
@@ -122,3 +124,5 @@ Emails: e0268461@u.nus.edu
 Websites as reference:
 https://stackoverflow.com/ - used for some python related questions.
 https://docs.python.org/2.7/ - (official Python documentation) - used for other python related questions
+
+
