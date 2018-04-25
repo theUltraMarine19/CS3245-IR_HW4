@@ -42,7 +42,7 @@ QUERY EXPANSION TECHNIQUES
 We have a provided a detailed analysis of using these query expansion techniques on results in bonus.txt
 
 1) Synonyms : WordNet-Query expansions:
--> In case any term in the query isn’t in the dictionary, we find a synonym for it from the WordNet synonyms list which is there in our dictionary and use that to replace that term in the query.
+-> In case any term in the query isn’t in the dictionary, we find a single synonym for it from the WordNet synonyms list which is in our dictionary and use that to replace that term in the query.
 
 
 2) Synonyms : Thesaurus
@@ -115,14 +115,15 @@ with others in doing the assignment and did not take notes (digital or
 printed) from the discussions.
 
 Emails: e0268461@u.nus.edu
-	e0268631@u.nus.edu
-	e0268734@u.nus.edu
-	e0215813@u.nus.edu
-	
+    e0268631@u.nus.edu
+    e0268734@u.nus.edu
+    e0215813@u.nus.edu
+    
 
 == References ==
 Websites as reference:
 https://stackoverflow.com/ - used for some python related questions.
 https://docs.python.org/2.7/ - (official Python documentation) - used for other python related questions
+
 
 
