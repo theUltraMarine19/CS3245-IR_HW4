@@ -86,6 +86,7 @@ def get_postings(term, dictionary, fp_postings):
         unstemmed_term_list = term
     term_list = [ps.stem(x) for x in unstemmed_term_list]
 
+    # for terms of length 1, freetext case basically
     if len(term_list) == 1:
         term1 = term_list[0]
         if term1 in dictionary:
@@ -107,46 +108,60 @@ def get_postings(term, dictionary, fp_postings):
         term1 = term_list[0]
         term2 = term_list[1]
 
+        # check if term is in dictionary
         if term1 in dictionary:
             fp_postings.seek(dictionary[term1]['H'])
             postings1_str = fp_postings.read(dictionary[term1]['T'] - dictionary[term1]['H'])
+        # else get its synonym in dictionary from wordnet
         else:
             postings1_str = handle_synonyms_unigram([unstemmed_term_list[0]], dictionary, fp_postings)
 
+        # check if term is in dictionary
         if term2 in dictionary:
             fp_postings.seek(dictionary[term2]['H'])
             postings2_str = fp_postings.read(dictionary[term2]['T'] - dictionary[term2]['H'])
+        # else get its synonym in dictionary from wordnet
         else:
             postings2_str = handle_synonyms_unigram([unstemmed_term_list[1]], dictionary, fp_postings)
 
+        # fetch postings list for individual terms  
         postings_string = positional_intersect(postings1_str, postings2_str)
         postings_list = list(set([x[0] for x in postings_string]))
+        #remove duplicates
         postings_list = sorted(postings_list)
 
+    # phrasal queries of length 3 handled here
     elif len(term_list) == 3:
 
         term1 = term_list[0]
         term2 = term_list[1]
         term3 = term_list[2]
 
+        # check if term is in dictionary
         if term1 in dictionary:
             fp_postings.seek(dictionary[term1]['H'])
             postings1_string = fp_postings.read(dictionary[term1]['T'] - dictionary[term1]['H'])
+        # else get its synonym in dictionary from wordnet
         else:
             postings1_string = handle_synonyms_unigram([unstemmed_term_list[0]], dictionary, fp_postings)
 
+        # check if term is in dictionary
         if term2 in dictionary:
             fp_postings.seek(dictionary[term2]['H'])
             postings2_string = fp_postings.read(dictionary[term2]['T'] - dictionary[term2]['H'])
+        # else get its synonym in dictionary from wordnet
         else:
             postings2_string = handle_synonyms_unigram([unstemmed_term_list[1]], dictionary, fp_postings)
 
+        # check if term is in dictionary
         if term3 in dictionary:
             fp_postings.seek(dictionary[term3]['H'])
             postings3_string = fp_postings.read(dictionary[term3]['T'] - dictionary[term3]['H'])
+        # else get its synonym in dictionary from wordnet
         else:
             postings3_string = handle_synonyms_unigram([unstemmed_term_list[2]], dictionary, fp_postings)
 
+        # fetch postings list for individual terms       
         postings12_list = positional_intersect(postings1_string, postings2_string)
         postings23_list = positional_intersect(postings2_string, postings3_string)
         final_postings = []
@@ -155,6 +170,7 @@ def get_postings(term, dictionary, fp_postings):
                 if tup1[0] == tup2[0] and tup1[1][1] == tup2[1][0]:
                     final_postings.append(tup1[0])
 
+        # remove duplicates
         postings_list = list(set(final_postings))
         postings_list = sorted(postings_list)
 
@@ -164,14 +180,11 @@ def get_postings(term, dictionary, fp_postings):
     # if successfully reaches here without error, return fetched postings list
 
     postings_list_tuple = []
+    # generatte output format to be sent back in
     for e in postings_list:
-        # e_list = e.split('-')
-        # tf = len(e_list) - 1
-        # if boolean retrieval is called with phrase, then add positional indexing at the end
         if type(e) == tuple:
             postings_list_tuple.append((e[0], e[1]))
         else:
             postings_list_tuple.append((e, -1))
 
-    # print postings_list_tuple
     return postings_list_tuple
