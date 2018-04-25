@@ -71,6 +71,8 @@ OTHER EXPERIMENTS:
 
 -> We tried with converting boolean queries to complete freetext queries and get their output. Even though this was giving a higher recall which means some of the relevant documents didn’t contain the exact phrase as they weren’t being retrieved by the positional index based system , it also gave a lower precision since more documents were being retrieved now and the relevant documents were lower up in the ranking order. So while this was useful, we couldn’t just use this. So we first output the result of phrase search using positional and then the output of fully freetext query.
 
+-> W tried using phrases for freetext queries as well, forming bigrams and trigrams out of that, but it decreased our precision. 
+
 -> Sometimes, the using the positional index, the query results we obtain is empty. In that case, if there are any phrases in the query, we try to retrieve all documents which contain those phrases, and then we append the results of the entire query converted to freetext to this.
 
 -> Using the postional intersection, we tried to do the proximity search, which implies that even if a document doesn't contain the phrase, but the words appear within a window of 10, then we put those doc IDs into our result set
@@ -98,6 +100,10 @@ The two copies of the documents with these document id's had the same content bu
 ORIGINAL IDEAS
 -> In dealing with boolean queries, we used the unique idea of first printing the output of the boolean query as we did in HW2 and then converting the entire query to fully freetext and then outputting it's output. This helped to significantly improve our score on the leaderboard.
 
+-> For using positional indices with phrases, we used strict conjunction of words in phrases, i.e., they should appear as exactly in phrase. 
+
+-> We also try to output the result set for any phrases in boolean queries over freetext, if the original boolean query returns an empty result set.
+
 -> We used several query expansion ideas like metadata, rocchio, thesaurus and wordnet for synonyms.
 
 -> We used the stemming optimization to remedy the bottleneck and speed up indexing.
@@ -105,9 +111,9 @@ ORIGINAL IDEAS
 
 
 DISTRIBUTION OF WORK
-A0179092W ->
+A0179092W -> built basic code framework, and worked on boolean retrieval, AND intersection, and handling synonyms.
 A0175111U -> build dictionary and postings in indexing phase, help integrating synonyms, thesaurus and rocchio formula in searching phase.
-A0179365N ->
+A0179365N -> built the thesaurus in index, tf-idf ranking and similarity, wrote positional intersection and proximity for phrasal queries, wrote optimizations for combination of search strategies 
 A0179262X -> building dictionary and postings, metadata zones and fields implementation, free text retrieval in search, helped with rochio
 
 == Files included with this submission ==
