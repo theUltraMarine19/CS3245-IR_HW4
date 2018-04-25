@@ -130,6 +130,7 @@ def zones_metadata(doc_id_score_list, dictionary):
     res.sort(key=lambda x: x[1], reverse=True)
     return res
 
+# taking command line parameters here
 def usage():
     print "usage: " + sys.argv[0] + " -d dictionary-file -p postings-file -q file-of-queries -o output-file-of-results"
 
@@ -159,6 +160,7 @@ if dictionary_file is None or postings_file is None or file_of_queries is None o
 
 
 def main():
+    # load and open dictionaries and postings here
     fp_postings = open(postings_file, 'r')
     term_dictionary = load_dict_file(dictionary_file)
     metadata_dictionary = load_meta_dict_file("metadict.txt")
@@ -167,6 +169,7 @@ def main():
     with open(file_of_queries, 'r') as fp:
         query = fp.readlines()
         
+        # handler for boolean queries
         if "AND" in query[0] or "\"" in query[0][0].strip():
             # call boolean retrieval -> e.g boolRetriev(query.split('AND'))
             res = br.bool_retrieve(query[0].split("AND"), term_dictionary, fp_postings)
@@ -188,9 +191,11 @@ def main():
                     eles = ele.split()
                     final_term_list.extend(eles)
 
+            # append output of fully freetext form of query to boolean output
             res1 = fr.freetext_retrieve(final_term_list, term_dictionary, thesaurus, fp_postings, True)
             res1 = [str(x[0]) for x in res1]
 
+            # remove duplicates
             for x in res1:
                 if x not in res:
                     res.append(x)
@@ -211,11 +216,13 @@ def main():
                 elif s:
                     terms.append(s)
 
+            # call handler of freetext queries here
             res = fr.freetext_retrieve(terms, term_dictionary, thesaurus, fp_postings, True)
             if zones_metadata_switch == True:
                 res = zones_metadata(res, metadata_dictionary)
             res = [x[0] for x in res]
 
+    # output the result to a file
     with open(file_of_output, 'w') as out:
         out_str = str()
         out_str += ' '.join(str(el) for el in res) + '\n'

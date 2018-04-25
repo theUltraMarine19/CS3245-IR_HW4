@@ -223,10 +223,17 @@ def build_thesaurus():
         thesaurus[positional_list[i]] = sim_terms[1 : SIM_BOUND]
 
 def write_thesaurus(thes_out_file):
+    """
+    dump the thesaurus to an output file here
+    """
     with open(thes_out_file, 'w') as thes_out_dict:
         json.dump(thesaurus, thes_out_dict)
 
 def build_meta_dict(doc_id, title, content, date_posted, court):
+    """
+    for each doc id dump the court name, date posted and
+    title to the meta data dictionary
+    """
     meta_dict['title'][doc_id] = title
     meta_dict['date_posted'][doc_id] = date_posted
     meta_dict['court'][doc_id] = court
@@ -274,6 +281,7 @@ def write_positional_output(positional_dict, positional_count_dict, output_file_
                         out_str += '-' + str(pos_val)
                 posting.append(out_str)
 
+                # compute document normalization values here
                 if doc_id not in doc_norm:
                     values = [1 + math.log(i, 10) for i in doc_words[doc_id].values()]
                     norm_val = math.sqrt(sum(i ** 2 for i in values))
@@ -281,11 +289,13 @@ def write_positional_output(positional_dict, positional_count_dict, output_file_
 
             posting_str = " ".join(str(e) for e in posting) + " "
 
+            # dump postings to output file
             head = out_postings.tell()
             out_postings.write(posting_str)
             freq = len(doc_id_list)
             tail = out_postings.tell()
 
+            # build pisitionl index count dictionary
             build_positional_index_count_dict(positional_count_dict, term, head, tail, freq)
 
     with open(output_file_dictionary, 'w') as out_dict:
@@ -310,7 +320,6 @@ if __name__ == "__main__":
     read_data_files(dataset_file) # build the dictionaries
     write_positional_output(positional_dict, positional_count_dict, output_pos_dict, output_pos_postings) # output posiional dictionary and postings to files
     write_meta_output(meta_dict, output_meta_dict) # output metadat dictionary and postings to files
-
-    # transform()
-    # build_thesaurus()
-    # write_thesaurus('thesaurus.txt')
+    transform()
+    build_thesaurus() #generate the thesaurus
+    write_thesaurus('thesaurus.txt') # dump thesaurus to output file
