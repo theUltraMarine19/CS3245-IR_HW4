@@ -169,8 +169,11 @@ def main():
     with open(file_of_queries, 'r') as fp:
         query = fp.readlines()
         
+        # for empty query files
+        if len(query) == 0:
+            res = []
         # handler for boolean queries
-        if "AND" in query[0] or "\"" in query[0][0].strip():
+        elif "AND" in query[0] or "\"" in query[0][0].strip():
             # call boolean retrieval -> e.g boolRetriev(query.split('AND'))
             res = br.bool_retrieve(query[0].split("AND"), term_dictionary, fp_postings)
             query[0] = " ".join(query[0].split("AND"))
@@ -185,6 +188,16 @@ def main():
                 elif s:
                     terms.append(s)
 
+            # in case the above query returns nothing, we make another attempt to retrieve only the phrasal part, 
+            # since phrases are more important compared to freetext retrieval
+            phrasal_term = []
+            if len(res) == 0:
+                for term in terms:
+                    if ' ' in term:
+                        phrasal_term.append(term)
+                res = br.bool_retrieve(phrasal_term, term_dictionary, fp_postings)
+            
+            # convert completely to freetext
             final_term_list = []
             for ele in terms:
                 if len(ele) > 1:

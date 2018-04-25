@@ -24,6 +24,7 @@ A) Boolean retrieval:
 -> For a singular freetext term, we just fetch it’s entire postings.
 -> We perform the AND operation between phrases and/or singular freetext terms using the AND merging algorithm for postings
 -> As an additional step, we then convert the entire query into freetext and append the output obtained from that to the result as well. For example  “Good Morning” AND “New York” is converted to the fully freetext form ‘Good Morning New York’ to compute it’s output.
+-> Additionally, before the freetext conversion step, we check if there are any phrases in the query, and also put the retrieved doc IDs containing them in the result set, before the freetext query results. This is done if original boolean query using positional indices gives no result.
 
 B) Freetext retrieval:
 -> We ranked documents by cosine similarity based on tf×idf. We implemented the lnc.ltc ranking scheme (i.e., log tf and idf with cosine normalization for queries documents, and log tf, cosine normalization but no idf for documents) 
@@ -70,6 +71,10 @@ OTHER EXPERIMENTS:
 -> We tried to create a bigram and trigram dictionary that turned out to be too large and went beyond 4GB of memory, which is the reason we are currently using positional indexing.
 
 -> We tried with converting boolean queries to complete freetext queries and get their output. Even though this was giving a higher recall which means some of the relevant documents didn’t contain the exact phrase as they weren’t being retrieved by the positional index based system , it also gave a lower precision since more documents were being retrieved now and the relevant documents were lower up in the ranking order. So while this was useful, we couldn’t just use this. So we first output the result of phrase search using positional and then the output of fully freetext query.
+
+-> Sometimes, the using the positional index, the query results we obtain is empty. In that case, if there are any phrases in the query, we try to retrieve all documents which contain those phrases, and then we append the results of the entire query converted to freetext to this.
+
+-> Using the postional intersection, we tried to do the proximity search, which implies that even if a document doesn't contain the phrase, but the words appear within a window of 10, then we put those doc IDs into our result set
 
 -> We examined some documents and found that there were 16 documents in the datatset.csv which had duplicate document Id's. They are -
 247336
