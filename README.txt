@@ -65,7 +65,6 @@ We observed that indexing was taking too long (about 1 hour or so). We discovere
  
 
 OTHER EXPERIMENTS:
-(not part of current code)
 
 -> We tried to create a bigram and trigram dictionary that turned out to be too large and went beyond 4GB of memory, which is the reason we are currently using positional indexing.
 
