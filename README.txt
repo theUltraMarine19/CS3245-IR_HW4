@@ -106,9 +106,9 @@ ORIGINAL IDEAS
 
 DISTRIBUTION OF WORK
 A0179092W ->
-A0175111U -> 
+A0175111U -> build dictionary and postings in indexing phase, help integrating synonyms, thesaurus and rocchio formula in searching phase.
 A0179365N ->
-A0179262X -> building dictionary and postings, metadata zones and fields implementation, free text retrieval in search
+A0179262X -> building dictionary and postings, metadata zones and fields implementation, free text retrieval in search, helped with rochio
 
 == Files included with this submission ==
 
