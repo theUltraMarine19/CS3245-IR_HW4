@@ -7,9 +7,8 @@ from synonyms import get_synonyms
 
 ps = PorterStemmer()
 
-
+# toggle Rocchio usage on and off using this
 rocchio = False
-
 # toggle thesaurus usage on and off using this
 thesaurus_switch = False
 

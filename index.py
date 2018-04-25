@@ -307,7 +307,7 @@ def write_meta_output(meta_dict, output_file_dictionary):
 
 
 if __name__ == "__main__":
-    read_data_files(dataset_file) #build he dictionaries
+    read_data_files(dataset_file) # build the dictionaries
     write_positional_output(positional_dict, positional_count_dict, output_pos_dict, output_pos_postings) # output posiional dictionary and postings to files
     write_meta_output(meta_dict, output_meta_dict) # output metadat dictionary and postings to files
 
