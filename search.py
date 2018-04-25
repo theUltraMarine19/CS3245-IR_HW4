@@ -184,8 +184,6 @@ def main():
             res1 = fr.freetext_retrieve(final_term_list, term_dictionary, fp_postings, True)
             res1 = [str(x[0]) for x in res1]
 
-            print res
-            print res1
             for x in res1:
                 if x not in res:
                     res.append(x)
@@ -206,37 +204,10 @@ def main():
                 elif s:
                     terms.append(s)
 
-            res_temp = []
-            trigram_list = [terms[i:i+3] for i in range(len(terms)-2)]
-            # print trigram_list
-            bigram_list = [terms[i:i+2] for i in range(len(terms)-1)]
-            # print bigram_list
-            for trigram in trigram_list:
-                temp = br.bool_retrieve([' '.join(trigram)], term_dictionary, fp_postings)
-                print trigram
-                print temp
-                res_temp.extend(temp)
-
-            for bigram in bigram_list:
-                temp = br.bool_retrieve([' '.join(bigram)], term_dictionary, fp_postings)
-                print bigram
-                print temp
-                res_temp.extend(temp)
-
             res = fr.freetext_retrieve(terms, term_dictionary, fp_postings, True)
             if zones_metadata_switch == True:
                 res = zones_metadata(res, metadata_dictionary)
-            # print res
             res = [x[0] for x in res]
-
-            # print res_temp
-            # print res
-            res_temp.extend(res)
-            res = []
-            for ele in res_temp:
-                if ele not in res:
-                    res.append(ele)
-
 
     with open(file_of_output, 'w') as out:
         out_str = str()
