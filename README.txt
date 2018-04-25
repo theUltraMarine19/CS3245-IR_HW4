@@ -71,6 +71,26 @@ OTHER EXPERIMENTS:
 
 -> We tried with converting boolean queries to complete freetext queries and get their output. Even though this was giving a higher recall which means some of the relevant documents didn’t contain the exact phrase as they weren’t being retrieved by the positional index based system , it also gave a lower precision since more documents were being retrieved now and the relevant documents were lower up in the ranking order. So while this was useful, we couldn’t just use this. So we first output the result of phrase search using positional and then the output of fully freetext query.
 
+-> We examined some documents and found that there were 16 documents in the datatset.csv which had duplicate document Id's. They are -
+247336
+2044863
+2145566
+2147493
+2148198
+2167027
+2225321
+2225341
+2225516
+2225597
+2225598
+3062427
+3062433
+3063259
+3063522
+3926753
+The two copies of the documents with these document id's had the same content but different court names in most cases. This duplication of data while not a major roadblock, was affecting our term freqeuncy and document normlization calculations by a small value.
+
+
 
 == Files included with this submission ==
 
